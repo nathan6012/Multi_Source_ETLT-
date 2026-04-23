@@ -16,7 +16,7 @@ def save_raw_db_data(data):
   cwd = Path(__file__).resolve().parent
   root_dir = cwd.parent
   sub_folder = root_dir/"datalake"
-  
+
   sub_folder.mkdir(parents=True, exist_ok=True)
   
   # Data tracking for Backfils 

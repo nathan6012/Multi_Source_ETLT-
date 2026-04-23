@@ -21,9 +21,11 @@ limiter = AsyncLimiter(5, 1)
 cwd = Path(__file__).resolve().parent
 root = cwd.parent
 sub_folder = root/"local"
+sub_folder.mkdir(parents=True, exist_ok=True)
 # state checker Saved in local 
 # rest or use startung before for okd data 
 CHECKPOINT_FILE = sub_folder/"checkpoint.json"
+
 
 
 
