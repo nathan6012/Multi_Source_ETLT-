@@ -1,0 +1,15 @@
+pandas
+pydantic
+sqlalchemy
+httpx
+aiolimiter
+tenacity==9.1.4
+python-dotenv
+prefect==3.6.24
+openpyxl
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9
+
+pytest
+pytest-asyncio
+fakeredis==1.7.0

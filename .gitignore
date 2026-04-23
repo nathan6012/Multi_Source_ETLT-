@@ -1,0 +1,16 @@
+credentials/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+env/
+.env 
+venv/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+logs/
+*.log
+dist/
+build/
+
