@@ -1,13 +1,10 @@
-https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg
-
-https://docs.prefect.io/img/logos/prefect-logo-mark.svg
-
-https://raw.githubusercontent.com/devicons/devicon/master/icons/github/github-original.svg
-
-https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg
-
-https://raw.githubusercontent.com/devicons/devicon/master/icons/pandas/pandas-original.svg
-
+Python](https://img.shields.io/badge/Python-3.x-blue)
+![Prefect](https://img.shields.io/badge/Orchestration-Prefect-06b6d4)
+![Pandas](https://img.shields.io/badge/Data-Pandas-black)
+![SQLAlchemy](https://img.shields.io/badge/Database-SQLAlchemy-red)
+![Neon PostgreSQL](https://img.shields.io/badge/Storage-Neon%20PostgreSQL-00E599?logo=postgresql&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Validation-Pydantic-009688?logo=pydantic&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/Automation-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
 
 
 # ETL Data Engineering Pipeline System
