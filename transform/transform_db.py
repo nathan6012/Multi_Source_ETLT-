@@ -62,6 +62,8 @@ def transform_database_data(clean_x,unclean_y):
         clean[col] = clean[col].replace({pd.NA: None})
   clean = clean.drop(columns=["idx"])
   
+  print(clean.dtypes)
+  
 
   dataset = clean.to_dict(orient="records")
   

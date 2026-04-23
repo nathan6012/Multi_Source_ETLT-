@@ -67,6 +67,8 @@ def transform_excel_data(clean_n, unclean_p):
 
     # Drop index column safely
   clean = clean.drop(columns=["idx"], errors="ignore")
+  
+  print(clean.dtypes)
 
     # Convert to records
   dataset = clean.to_dict(orient="records")
