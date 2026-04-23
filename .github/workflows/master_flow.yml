@@ -44,10 +44,23 @@ jobs:
           echo "Current directory:"
           pwd
           echo "Project structure:"
-          ls -R    
+          ls -R 
+      - name: Download checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: checkpoint
+          path: local
+        continue-on-error: true    
 
       - name: Run Master_ETL workflow
         run: python -m app.main
+      
+      - name: Upload checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkpoint
+          path: local/checkpoint.json 
+        continue-on-error: true  
         
       - name: Slack Notification Success
         if: success()
