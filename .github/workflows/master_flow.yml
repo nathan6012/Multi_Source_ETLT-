@@ -5,7 +5,7 @@ on:
       - main
     paths:
       - "local/**/*.xlsx"
-
+  workflow_dispatch:     
   schedule:
     - cron: "0 5 * * *"  # every  days
 
