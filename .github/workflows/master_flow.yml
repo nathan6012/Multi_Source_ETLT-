@@ -50,8 +50,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@://github.com"
-          mkdir -p output/ local/ logs/datalake/
-          git add output/ local/ logs/datalake/
+          mkdir -p output/ local/datalake/
+          git add output/ local/datalake/
           if [ -n "$(git status --short)" ]; then
           git commit -m "update outputs"
           git push
