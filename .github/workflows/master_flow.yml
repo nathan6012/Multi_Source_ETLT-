@@ -45,18 +45,18 @@ jobs:
       - name: Run Master_ETL workflow
         run: python -m app.main
       
-      name: Commit outputs
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        mkdir -p output/ local/ datalake/
-        git add output/ local/ datalake/
-        if [ -n "$(git status --short)" ]; then
-        git commit -m "update outputs, local, and datalake"
-        git push
-        else
-        echo "No changes to commit"
-        fi
+      - name: Commit outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p  local/ datalake/
+          git add  local/ datalake/
+          if [ -n "$(git status --short)" ]; then
+          git commit -m "update outputs, local, and datalake"
+          git push
+          else
+          echo "No changes to commit"
+          fi
   
         
       
