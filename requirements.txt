@@ -1,4 +1,3 @@
-pandas
 pydantic
 sqlalchemy
 httpx
@@ -9,7 +8,9 @@ prefect==3.6.24
 openpyxl
 asyncpg>=0.29.0
 psycopg2-binary>=2.9.9
-
+pydocket>=0.18,<0.20
+numpy<3
+pandas<3
 pytest
 pytest-asyncio
 fakeredis==1.7.0
