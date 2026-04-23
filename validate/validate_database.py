@@ -33,8 +33,7 @@ def validate_database_data(data,Model):
     logging.warning("Some DB Data has Been Pushed to Dqueue/Invalid failed Validatedion check and clean fields ")
     
     
-  with open("valid_db.json","w") as f:
-    json.dump(clean,f,indent=6)
+  
         
     
   return clean,unclean

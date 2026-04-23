@@ -40,8 +40,7 @@ def validate_api(data,Model):
     
     
   # Remove aftet Cleaning   
-  with open("valid_api.json","w") as f:
-    json.dump(clean,f,indent=6)
+  
       
     
   

@@ -35,8 +35,6 @@ def validate_file_data(data,Model):
     logging.warning("Some Execel  Data has Been Pushed to DLqueue/Invalid failed Validatedion ,Check the Fields ")
     
     
-  with open("valid_file.json","w") as f:
-    json.dump(clean,f,indent=6)  
     
     
   
