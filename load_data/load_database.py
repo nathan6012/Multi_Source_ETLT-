@@ -20,6 +20,7 @@ logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
 
+# To change to Big Query 
 async def load_db_data_database(data):
   """Loads The Transformed Data to Posgres Db"""
   
