@@ -1,4 +1,4 @@
-weCREATE dim_product_details(
+CREATE dim_product_details(
   details_id SERIAL PRIMARY KEY ,
   product_name TEXT NOT NULL ,
   category TEXT NOT NULL,
