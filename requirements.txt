@@ -5,9 +5,10 @@ tenacity==9.1.4
 python-dotenv
 google-cloud-bigquery
 pyarrow
+pandas-gbq
+
 
 numpy<3
-pandas<3
 openpyxl
 
 sqlalchemy

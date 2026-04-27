@@ -49,7 +49,8 @@ def big_Query_client(data):
   print("CSV loaded successfully")
 
   
-  table_id = "calm-sky-419511.Nathanetl_sales.production"
+  table_id = "calm-sky-419511.Nathanelt_sales.production"
+  
 
   job_config = bigquery.LoadJobConfig(
         autodetect=True,
