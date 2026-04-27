@@ -19,7 +19,7 @@ def big_Query_client(data):
   """ Loads CSV transformed Data to Big Query Data Warehosue """ 
   cwd = Path(__file__).resolve().parent
   root_dir = cwd.parent
-  sub_folder = root_dir/"datalake"
+  sub_folder = root_dir/"local"
   sub_folder.mkdir(parents=True, exist_ok=True)
   
  # export GOOGLE_APPLICATION_CREDENTIALS=credentials/calm-sky-419511-38ce7f0f9910.json
