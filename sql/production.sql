@@ -1,4 +1,4 @@
-CREATE dim_product_details(
+weCREATE dim_product_details(
   details_id SERIAL PRIMARY KEY ,
   product_name TEXT NOT NULL ,
   category TEXT NOT NULL,
@@ -29,5 +29,5 @@ CREATE facts_production(
   revenue INT NOT NULL ,
   cost INT NOT NULL,
   analyst_score INT NOT NULL,
-  crested_on TIMESTAMPS NOW()
+  created_on TIMESTAMPS NOW()
 );
