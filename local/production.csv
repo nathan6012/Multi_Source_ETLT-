@@ -1,0 +1,11 @@
+production_id,product_name,category,region,production_date,units_produced,defective_units,revenue,cost,analyst_score
+1,Apple iphone 15 ,Electronics,East Africa,2026-01-01,1200,15,240000.0,180000.0,4.5
+2,AlphaPhone,Electronics,West Africa,2026-01-02,1100,20,220000.0,170000.0,4.199999809265137
+3,SmartTV X,Electronics,Europe,2026-01-03,900,10,270000.0,200000.0,4.599999904632568
+4,SmartTV X pro ,Electronics,Asia,2026-01-04,950,12,285000.0,210000.0,4.699999809265137
+5,EcoFridge,Appliances,North America,2026-01-05,800,8,160000.0,120000.0,4.300000190734863
+6,Oven,Appliances,Europe,2026-01-06,850,9,170000.0,125000.0,4.400000095367432
+7,SolarPanel Pro,Energy,Africa,2026-01-07,700,5,350000.0,250000.0,4.800000190734863
+8,Battery ,Energy,Asia,2026-01-08,720,6,360000.0,255000.0,4.699999809265137
+9,GamingLaptop Z,Computers,North America,2026-01-09,650,14,325000.0,260000.0,4.5
+10,Lenovo Pc,Computers,Europe,2026-01-10,680,13,340000.0,265000.0,4.599999904632568
