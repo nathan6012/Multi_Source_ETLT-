@@ -1,3 +1,5 @@
+--analytic schemas 
+
 CREATE  dim_order_prodcuts(
   products_id INT SERIAL PRIMARY KEY,
   product  TEXT NOT NULL,
@@ -13,7 +15,7 @@ CREATE dim_order_date(
 );
 
 
-create facts_full_orders(
+CREATE facts_full_orders(
   order_id iNT SERIAL PRIMARY KEY ,
   product_id INT NOT NULL REFERENCES dim_order_products(product_id),
   date_id  DATE NOT NULL REFERENCE dim_order_date(date_id)

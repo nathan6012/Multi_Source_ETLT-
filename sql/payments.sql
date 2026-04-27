@@ -1,3 +1,5 @@
+--analytic schemas 
+
 CREATE dim_payment_details(
   details_id INT SERIAL PRIMARY KEY,
   currency TEXT NOT NULL,
