@@ -119,7 +119,7 @@ def transform_database_data_task(f,g):
   return transform_database_data(f,g)
   
 @task(name = "load_db_data_Big_Query")
-async def load_db_data_big_query_task(m):
+def load_db_data_big_query_task(m):
   return big_Query_client(m)
   
   

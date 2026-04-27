@@ -27,15 +27,21 @@ def big_Query_client(data):
   cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
   if not cred_path:
     raise ValueError("GOOGLE_APPLICATION_CREDENTIALS not set!")
-
+    
+  if not data:
+        raise ValueError("❌ Empty dataset - skipping BigQuery load")
+  
+    
 
   client = bigquery.Client()
   
-  
+  logging.info("Running Big Query Load")
   df = pd.DataFrame(data)
+  print(df.dtypes)
   
   csv_path = sub_folder / "production.csv"
   df.to_csv(csv_path, index=False)
+  
   
   logging.info(f"Data staged at: {csv_path}")
 
