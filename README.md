@@ -5,12 +5,15 @@ Python](https://img.shields.io/badge/Python-3.x-blue)
 ![Neon PostgreSQL](https://img.shields.io/badge/Storage-Neon%20PostgreSQL-00E599?logo=postgresql&logoColor=white)
 ![Pydantic](https://img.shields.io/badge/Validation-Pydantic-009688?logo=pydantic&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/Automation-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
+![BigQuery](https://img.shields.io/badge/Database-BigQuery-4285F4?logo=googlecloud&logoColor=white)
+
+
 
 
 # ETL Data Engineering Pipeline System
 
 A production-style multi-source ETL pipeline that extracts, validates, transforms, and loads data from multiple sources into a centralized analytics-ready structure.
-can use Postgres Or Data Warehouse like Big Query 
+can use Postgres and  Data Warehouse  Big Query 
 ---
 
 🚀 Overview
@@ -18,7 +21,7 @@ can use Postgres Or Data Warehouse like Big Query
 This system automates end-to-end data workflows from:
 
 - 📡 APIs
-- 🗄️ Databases
+- 🗄️ Databases migration 
 - 📄 Excel files
 - 📁 Local file uploads
 
@@ -156,6 +159,8 @@ The pipeline produces:
 - sqlalchemy
 - pathlib
 - httpx
+- big guery cloud
+- pyarrow
 - openpyxl
 - pydantic 
 

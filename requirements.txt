@@ -3,6 +3,8 @@ httpx
 aiolimiter
 tenacity==9.1.4
 python-dotenv
+google-cloud-bigquery
+pyarrow
 
 numpy<3
 pandas<3

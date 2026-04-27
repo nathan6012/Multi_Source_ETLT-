@@ -56,7 +56,7 @@ from transform.transform_file import transform_excel_data
 # Load_data imports 
 from load_data.load_api import load_api_data_database
 
-from load_data.load_database import load_db_data_database
+from load_data.load_database import big_Query_client
 
 from load_data.load_file import load_file_data_database
 
@@ -118,9 +118,9 @@ def validate_database_data_task(y,model):
 def transform_database_data_task(f,g):
   return transform_database_data(f,g)
   
-@task(name = "load_db_data_database")
-async def load_db_data_database_task(m):
-  return await load_db_data_database(m)
+@task(name = "load_db_data_Big_Query")
+async def load_db_data_big_query_task(m):
+  return big_Query_client(m)
   
   
 # Excel Files 
@@ -186,8 +186,11 @@ async def main_flow_db():
   
   records0 = transform_database_data_task(clean1,unclean1)
   
-  await load_db_data_database_task(records0)
+  load_db_data_big_query_task(records0)
   
+
+
+
 
 #Excel 
 flow(name="excel_flow", log_prints=True)

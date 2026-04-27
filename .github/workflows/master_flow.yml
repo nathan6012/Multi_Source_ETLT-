@@ -25,6 +25,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+  
+        
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
