@@ -278,8 +278,6 @@ async def etl_orchestrator():
   return client
  
   
-if __name__ =="__main__":
-  asyncio.run(etl_orchestrator())
   
   
   
