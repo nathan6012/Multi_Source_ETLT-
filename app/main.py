@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from prefect import flow, task
 from prefect.blocks.system import Secret
+#from prefect.blocks.system import Secret
 
 
 import asyncio
@@ -231,16 +232,16 @@ async def main_flow_excel():
 @flow(name="etl_orchestrator")
 async def etl_orchestrator():
   """ Master Main of mains """
-  db_url = Secret.load("database-url").get()
-  api_key = Secret.load("api-key").get()
-  slack = Secret.load("slack-webhook").get()
+  db_secret = await Secret.load("database-url")
+  db_secret.get()
+  api_secret = await Secret.load("api-key")
+  api_secret.get()
+  slack_secret = await Secret.load("slack-webhook")
+  slack_secret.get()
   
+  gcp_secret = await Secret.load("gcp-credentials")
+  json.loads(gcp_secret.get()
   
-  gcp_creds = json.loads(
-    Secret.load("gcp-credentials").get())
-    
-  print("Secrets loaded successfully")
-
 # Flow 
   await main_flow_api()
   await main_flow_db()
@@ -248,7 +249,7 @@ async def etl_orchestrator():
   files_management_task()
   print("Services for local files")
   
-  return client
+
  
   
   
