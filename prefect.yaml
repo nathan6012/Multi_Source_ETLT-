@@ -20,14 +20,14 @@ deployments:
   - name: master-etl-deployment
     entrypoint: app/main.py:etl_orchestrator
     
+    on_failure:
+      - app.main.notify_failure
+    on_completion:
+      - app.main.notify_success
+    
+    
     job_variables:
-      env:
-        DATABASE_URL: "{{ $DATABASE_URL }}"
-        API_KEY: "{{ $API_KEY }}"
-        PREFECT_API_KEY: "{{ $PREFECT_API_KEY }}"
-        PREFECT_API_URL: "{{ $PREFECT_API_URL }}"
-        GCP_CREDENTIALS: "{{ $GCP_CREDENTIALS }}"
-
+      env: {} 
     work_pool:
       name: My_etl_System
 

@@ -18,7 +18,6 @@ jobs:
       # Prefect Cloud auth
       PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5

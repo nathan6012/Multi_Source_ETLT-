@@ -5,8 +5,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 from prefect import flow, task
+from prefect.blocks.system import Secret
+
+
 import asyncio
 import logging 
+import json
 from google.cloud import bigquery
 
 
@@ -227,19 +231,15 @@ async def main_flow_excel():
 @flow(name="etl_orchestrator")
 async def etl_orchestrator():
   """ Master Main of mains """
-  db_url = os.getenv("DATABASE_URL")
-  api_key = os.getenv("API_KEY")
+  db_url = Secret.load("database-url").get()
+  api_key = Secret.load("api-key").get()
+  slack = Secret.load("slack-webhook").get()
   
-  if not db_url or not api_key:
-    raise ValueError("Missing required environment variables")
-  creds = os.getenv("GCP_CREDENTIALS")
-
-  if not creds:
-    raise ValueError("GCP_CREDENTIALS is missing")
-  creds_path = "/tmp/gcp.json"
-  with open(creds_path, "w") as f:
-    f.write(creds)
-  client = bigquery.Client.from_service_account_json(creds_path)
+  
+  gcp_creds = json.loads(
+    Secret.load("gcp-credentials").get())
+    
+  print("Secrets loaded successfully")
 
 # Flow 
   await main_flow_api()
