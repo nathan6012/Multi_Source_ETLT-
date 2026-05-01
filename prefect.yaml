@@ -1,21 +1,32 @@
 name: my-etl-project
-prefect-version: 3.0.0
+# Locked to your requested version
+prefect-version: 3.6.23
 
 pull:
   - prefect.deployments.steps.git_clone:
       repository: https://github.com/nathan6012/Multi_Source_ETLT-.git
       branch: main
+      id: clone_step
+
   - prefect.deployments.steps.run_shell_script:
-      script: pip install --upgrade pip    
-  - prefect.deployments.steps.pip_install_requirements:
-      requirements_file: ./requirements.txt
+      id: setup_env
+      script: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+      # This fixes the "No such file or directory" error for your requirements.txt
+      directory: "{{ clone_step.directory }}"
 
 deployments:
   - name: master-etl-deployment
     entrypoint: app/main.py:etl_orchestrator
-
-    parameters:
-      file_path: null
+    
+    job_variables:
+      env:
+        DATABASE_URL: "{{ $DATABASE_URL }}"
+        API_KEY: "{{ $API_KEY }}"
+        PREFECT_API_KEY: "{{ $PREFECT_API_KEY }}"
+        PREFECT_API_URL: "{{ $PREFECT_API_URL }}"
+        GCP_CREDENTIALS: "{{ $GCP_CREDENTIALS }}"
 
     work_pool:
       name: My_etl_System
@@ -25,14 +36,5 @@ deployments:
       timezone: "UTC"
 
     tags: ["etl"]
-
     retries: 2
     retry_delay_seconds: 60
-
-    job_variables:
-      env:
-        DATABASE_URL: "{{ DATABASE_URL }}"
-        API_KEY: "{{ API_KEY }}"
-        PREFECT_API_KEY: "{{ PREFECT_API_KEY }}"
-        PREFECT_API_URL: "{{ PREFECT_API_URL }}"
-        GCP_CREDENTIALS: "{{ GCP_CREDENTIALS }}"
