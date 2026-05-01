@@ -50,7 +50,6 @@ jobs:
           pip install prefect
 
       - name: Deploy to Prefect Cloud
-        if: steps.changes.outputs.excel == 'true'
         run: prefect deploy --all
 
       - name: Slack Notification

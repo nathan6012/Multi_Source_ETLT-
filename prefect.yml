@@ -11,7 +11,6 @@ pull:
 
 deployments:
   - name: master-etl-deployment
-
     entrypoint: app/main.py:etl_orchestrator
 
     parameters:
@@ -21,17 +20,18 @@ deployments:
       name: My_etl_System
 
     schedule:
-      cron: "*5/ * * *"
+      cron: "*/5 * * * *"
       timezone: "UTC"
+
+    tags: ["etl"]
 
     retries: 2
     retry_delay_seconds: 60
 
     job_variables:
       env:
-        DATABASE_URL: "${DATABASE_URL}"
-        API_KEY: "${API_KEY}"
-        PREFECT_API_KEY: "${PREFECT_API_KEY}"
-        PREFECT_API_URL: "${PREFECT_API_URL}"
-        GCP_CREDENTIALS: "${GCP_CREDENTIALS}"
-
+        DATABASE_URL: "{{ DATABASE_URL }}"
+        API_KEY: "{{ API_KEY }}"
+        PREFECT_API_KEY: "{{ PREFECT_API_KEY }}"
+        PREFECT_API_URL: "{{ PREFECT_API_URL }}"
+        GCP_CREDENTIALS: "{{ GCP_CREDENTIALS }}"
