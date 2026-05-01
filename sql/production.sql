@@ -1,8 +1,6 @@
-<<<<<<< HEAD
-=======
+
 -- Postgres Extract to Big Query Schemas 
 
->>>>>>> 8f78d95 (major update,prefect cloud)
 CREATE dim_product_details(
   details_id SERIAL PRIMARY KEY ,
   product_name TEXT NOT NULL ,
