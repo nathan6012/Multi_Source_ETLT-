@@ -5,9 +5,10 @@ pull:
   - prefect.deployments.steps.git_clone:
       repository: https://github.com/nathan6012/Multi_Source_ETLT-.git
       branch: main
-
+  - prefect.deployments.steps.run_shell_script:
+      script: pip install --upgrade pip    
   - prefect.deployments.steps.pip_install_requirements:
-      requirements_file: requirements.txt
+      requirements_file: ./requirements.txt
 
 deployments:
   - name: master-etl-deployment
