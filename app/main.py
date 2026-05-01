@@ -240,7 +240,7 @@ async def etl_orchestrator():
   slack_secret.get()
   
   gcp_secret = await Secret.load("gcp-credentials")
-  json.loads(gcp_secret.get()
+  json.loads(gcp_secret.get())
   
 # Flow 
   await main_flow_api()
