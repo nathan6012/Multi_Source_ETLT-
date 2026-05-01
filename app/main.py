@@ -206,7 +206,7 @@ async def main_flow_api():
   
 
 # Databases 
-flow(name="DB_flow", log_prints=True)
+@flow(name="DB_flow", log_prints=True)
 async def main_flow_db():
   """ From DB To DB/Warehouse """ 
   
@@ -223,7 +223,7 @@ async def main_flow_db():
 
 
 #Excel 
-flow(name="excel_flow", log_prints=True)
+@flow(name="excel_flow", log_prints=True)
 async def main_flow_excel():
   """from Excel to Database/cv/warehouse"""
   # Excel files
