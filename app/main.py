@@ -5,7 +5,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 from prefect import flow, task
-from prefect_slack import SlackWebhook
 import asyncio
 import logging 
 from google.cloud import bigquery
@@ -69,31 +68,6 @@ from app.file_sys import files_management
 
 
 
-
-slack_webhook_block = SlackWebhook.load("prefect-alerts-system01")
-
-
-def notify_failure(flow, flow_run, state):
-    message = (
-        f"❌ Flow FAILED\n"
-        f"Flow: {flow.name}\n"
-        f"Run: {flow_run.name}\n"
-        f"Run ID: {flow_run.id}"
-    )
-
-    slack_webhook_block.send(message)
-
-
-def notify_success(flow, flow_run, state):
-    message = (
-        f"✅ Flow SUCCESS\n"
-        f"Flow: {flow.name}\n"
-        f"Run: {flow_run.name}\n"
-        f"Run ID: {flow_run.id}"
-    )
-
-    slack_webhook_block.send(message)
-    
 
 
 
@@ -250,8 +224,7 @@ async def main_flow_excel():
   
   
  
-@flow(name="etl_orchestrator",
-on_failure=[notify_failure],on_completion=[notify_success])
+@flow(name="etl_orchestrator")
 async def etl_orchestrator():
   """ Master Main of mains """
   db_url = os.getenv("DATABASE_URL")
