@@ -22,13 +22,13 @@ def extract_xl_file(): # add Param
   storage = root_dir / "local"
 
   if not storage.exists():
-    logging.info("Storage folder does not exist")
+    logging.warning("Storage folder does not exist")
     return []
   # scaned file 
   xl_files = list(storage.glob("*.xlsx"))
 
   if not xl_files:
-    logging.info(f"No execel file found in storage ")
+    logging.warning(f"No execel file found in storage ")
     
     return []
 
@@ -48,7 +48,7 @@ def extract_xl_file(): # add Param
     logging.error(f"Failed to read Excel file {target_file_path}: {e}")
     sheets_dict = {}  
   
-  #If valid Run 
+  #If valid Run  and convert to dict format
   for sheet_name, df in sheets_dict.items():
     records = df.to_dict(orient="records")
     for r in records:

@@ -29,14 +29,14 @@ async def load_file_data_database(data):
   engine = create_async_engine(db_url,echo=False,
   pool_pre_ping=True,
   pool_size=5,
-  max_overflow=10,)
+  max_overflow=10,) # DB connection optimazation 
   
   metadata = MetaData()
   
   full_orders = Table(
     "full_orders",
     metadata,
-
+# Sql load Schemas 
     Column("order_id", Integer, primary_key=True),
     Column("customer", String),
     Column("region", String),
@@ -51,6 +51,7 @@ async def load_file_data_database(data):
 
 
   async with engine.begin() as conn:
+    # Helps for remove Dups using id 
     stmt = upsert(full_orders).values(data)
 
     stmt = stmt.on_conflict_do_update(

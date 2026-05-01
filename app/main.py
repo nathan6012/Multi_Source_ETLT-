@@ -3,9 +3,13 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+
 from prefect import flow, task
+from prefect_slack import SlackWebhook
 import asyncio
 import logging 
+from google.cloud import bigquery
+
 
 # Import all the other Files from Folders Here
 
@@ -62,6 +66,34 @@ from load_data.load_file import load_file_data_database
 
 from app.file_sys import files_management
 
+
+
+
+
+slack_webhook_block = SlackWebhook.load("prefect-alerts-system01")
+
+
+def notify_failure(flow, flow_run, state):
+    message = (
+        f"❌ Flow FAILED\n"
+        f"Flow: {flow.name}\n"
+        f"Run: {flow_run.name}\n"
+        f"Run ID: {flow_run.id}"
+    )
+
+    slack_webhook_block.send(message)
+
+
+def notify_success(flow, flow_run, state):
+    message = (
+        f"✅ Flow SUCCESS\n"
+        f"Flow: {flow.name}\n"
+        f"Run: {flow_run.name}\n"
+        f"Run ID: {flow_run.id}"
+    )
+
+    slack_webhook_block.send(message)
+    
 
 
 
@@ -190,8 +222,6 @@ async def main_flow_db():
   
 
 
-
-
 #Excel 
 flow(name="excel_flow", log_prints=True)
 async def main_flow_excel():
@@ -209,16 +239,43 @@ async def main_flow_excel():
     print("No Excel Files scanned")
     
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
  
-@flow(name="etl_orchestrator")
+@flow(name="etl_orchestrator",
+on_failure=[notify_failure],on_completion=[notify_success])
 async def etl_orchestrator():
   """ Master Main of mains """
+  db_url = os.getenv("DATABASE_URL")
+  api_key = os.getenv("API_KEY")
+  
+  if not db_url or not api_key:
+    raise ValueError("Missing required environment variables")
+  creds = os.getenv("GCP_CREDENTIALS")
 
+  if not creds:
+    raise ValueError("GCP_CREDENTIALS is missing")
+  creds_path = "/tmp/gcp.json"
+  with open(creds_path, "w") as f:
+    f.write(creds)
+  client = bigquery.Client.from_service_account_json(creds_path)
+
+# Flow 
   await main_flow_api()
   await main_flow_db()
   await main_flow_excel()
   files_management_task()
   print("Services for local files")
+  
+  return client
  
   
 if __name__ =="__main__":

@@ -16,6 +16,7 @@ asyncpg>=0.29.0
 psycopg2-binary>=2.9.9
 
 prefect==3.6.24
+prefect[slack]
 pydocket>=0.18.2,<0.20
 
 pytest

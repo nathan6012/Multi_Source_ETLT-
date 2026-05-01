@@ -44,9 +44,8 @@ def load_checkpoint():
   except Exception as e:
     logging.warning(f"Checkpoint corrupted, restarting fresh: {e}")
     return None
-
-
-
+    
+#______________________________________
 # Helper 2 
 def save_checkpoint(starting_after):
   """ saves/updates the cursor for next load """
@@ -62,27 +61,32 @@ def save_checkpoint(starting_after):
   
 
 
-#Fetch logic 
+
+
+
+
+
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=1, max=10)
 )
 async def fetch(client, starting_after=None):
-    async with limiter:
-      params = {"limit": 100}
+  """ httpx  Extract Logic """
+  async with limiter:
+    params = {"limit": 100}
 
-      if starting_after:
-        params["starting_after"] = starting_after
+    if starting_after:
+      params["starting_after"] = starting_after
         
         
-      resp = await client.get(
+    resp = await client.get(
         # Change url and endpoint 
             "https://api.stripe.com/v1/payment_intents",
             params=params
         )
 
-      resp.raise_for_status()
-      return resp.json()
+    resp.raise_for_status()
+    return resp.json()
 
 
 #Pipeline 

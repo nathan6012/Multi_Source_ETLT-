@@ -1,0 +1,37 @@
+name: my-etl-project
+prefect-version: 3.0.0
+
+pull:
+  - prefect.deployments.steps.git_clone:
+      repository: https://github.com/nathan6012/Multi_Source_ETLT-.git
+      branch: main
+
+  - prefect.deployments.steps.pip_install_requirements:
+      requirements_file: requirements.txt
+
+deployments:
+  - name: master-etl-deployment
+
+    entrypoint: app/main.py:etl_orchestrator
+
+    parameters:
+      file_path: null
+
+    work_pool:
+      name: My_etl_System
+
+    schedule:
+      cron: "*5/ * * *"
+      timezone: "UTC"
+
+    retries: 2
+    retry_delay_seconds: 60
+
+    job_variables:
+      env:
+        DATABASE_URL: "${DATABASE_URL}"
+        API_KEY: "${API_KEY}"
+        PREFECT_API_KEY: "${PREFECT_API_KEY}"
+        PREFECT_API_URL: "${PREFECT_API_URL}"
+        GCP_CREDENTIALS: "${GCP_CREDENTIALS}"
+

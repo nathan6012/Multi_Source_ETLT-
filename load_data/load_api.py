@@ -28,7 +28,7 @@ async def load_api_data_database(data):
   """Loads The Transformed Data to Posgres Db"""
   
   db_url = os.getenv("DATABASE_URL").strip()
-  
+ # Connect and Optimize Database Connection  
   engine = create_async_engine(db_url,echo=False,
   pool_pre_ping=True,
   pool_size=5,
@@ -36,7 +36,7 @@ async def load_api_data_database(data):
   
   
   metadata = MetaData()
-  
+  # DB schemas and inserts/ Increamnetal with upserts 
   payments = Table(
     "payments",
     metadata,
@@ -53,7 +53,7 @@ async def load_api_data_database(data):
     Column("channel", String),
     Column("region", String),
     Column("customer_type", String),)
-
+# For fast Query (indexes)
   Index("idx_payments", payments.c.id)
 
 

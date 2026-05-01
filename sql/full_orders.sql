@@ -1,4 +1,5 @@
 --analytic schemas 
+-- Excel File Extract OLAP new Schemas 
 
 CREATE  dim_order_prodcuts(
   products_id INT SERIAL PRIMARY KEY,
