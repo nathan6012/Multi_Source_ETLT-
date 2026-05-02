@@ -46,16 +46,14 @@ logging.basicConfig(level=logging.INFO)
 
 
 
-def send_slack(message: str):
-  """ Slack Notification sender """ 
-  webhook = Secret.load("slack-webhook").get()
+
+async def send_slack(message: str):
+  webhook = await Secret.load("slack-webhook")
+  webhook = webhook.get()
 
   if webhook:
     requests.post(webhook, json={"text": message})
-  if not webhook:
-    logging("No Web Hooks for Slack found ")
-    return 
-  
+        
 
 
 # ------------------- API TASKS -------------------
@@ -196,15 +194,16 @@ async def etl_orchestrator():
   gcp_creds = (await Secret.load("gcp-credentials")).get()
 
     # ruN FLOWS
-  await main_flow_api(api_key, db_url)
-  await main_flow_db(db_url, gcp_creds)
-  await main_flow_excel(db_url)
-
-  files_management_task()
   try:
-    send_slack("✅ ETL SUCCESS: etl_orchestrator")
+    
+    await main_flow_api(api_key, db_url)
+    await main_flow_db(db_url, gcp_creds)
+    await main_flow_excel(db_url)
+    files_management_task()
+    
+    await send_slack("✅ ETL SUCCESS: etl_orchestrator")
   except Exception as e:
-    send_slack("❌ ETL FAILED: etl_orchestrator")
+    await send_slack("❌ ETL FAILED: etl_orchestrator")
     raise e
   
   
