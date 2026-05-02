@@ -32,9 +32,9 @@ Modern organizations struggle with fragmented data across systems.
 This pipeline solves that by providing:
 
 - A **single source of truth**
-- Automated and scheduled ingestion
-- Standardized validation and transformation layers
-- BI-ready structured datasets
+- Automated and scheduled data ingestion across all sources 
+- Standardized local datalakes validation and transformation layers
+- BI-ready structured datasets in Database and Big Query warehouse 
 - Scalable multi-source integration
 
 ---
