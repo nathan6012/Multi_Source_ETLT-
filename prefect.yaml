@@ -32,8 +32,8 @@ deployments:
       name: My_etl_System
 
     schedule:
-      cron: "*/5 * * * *"
-      timezone: "UTC"
+      cron: "0 5 */2 * *"
+      timezone: "UTC"  
 
     tags: ["etl"]
     retries: 2
