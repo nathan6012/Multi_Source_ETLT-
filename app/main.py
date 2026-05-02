@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from prefect import flow, task
 from prefect.blocks.system import Secret
+import requests
 
 # Connectors
 from extract.api_connect import run_pipeline
@@ -41,6 +42,21 @@ from load_data.load_file import load_file_data_database
 from app.file_sys import files_management
 
 logging.basicConfig(level=logging.INFO)
+
+
+
+
+def send_slack(message: str):
+  """ Slack Notification sender """ 
+  webhook = Secret.load("slack-webhook").get()
+
+  if webhook:
+    requests.post(webhook, json={"text": message})
+  if not webhook:
+    logging("No Web Hooks for Slack found ")
+    return 
+  
+
 
 # ------------------- API TASKS -------------------
 
@@ -185,6 +201,11 @@ async def etl_orchestrator():
   await main_flow_excel(db_url)
 
   files_management_task()
+  
+  send_slack("✅ ETL SUCCESS: etl_orchestrator")
+  except Exception as e:
+    send_slack("❌ ETL FAILED: etl_orchestrator")
+    raise e
   
   
   

@@ -6,7 +6,7 @@ python-dotenv
 google-cloud-bigquery
 pyarrow
 pandas-gbq
-
+requests
 
 numpy<3
 openpyxl
