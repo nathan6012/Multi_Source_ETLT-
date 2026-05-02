@@ -201,8 +201,8 @@ async def etl_orchestrator():
   await main_flow_excel(db_url)
 
   files_management_task()
-  
-  send_slack("✅ ETL SUCCESS: etl_orchestrator")
+  try:
+    send_slack("✅ ETL SUCCESS: etl_orchestrator")
   except Exception as e:
     send_slack("❌ ETL FAILED: etl_orchestrator")
     raise e
