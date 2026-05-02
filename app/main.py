@@ -184,7 +184,7 @@ async def main_flow_excel(db_url):
 
 # ------------------- ORCHESTRATOR -------------------
 
-@flow(name="etl_orchestrator")
+@flow(name="etl_orchestrator",log_prints=True)
 async def etl_orchestrator():
 
     #LOAD SECRETS CORRECTLY
@@ -201,9 +201,19 @@ async def etl_orchestrator():
     await main_flow_excel(db_url)
     files_management_task()
     
-    await send_slack("✅ ETL SUCCESS: etl_orchestrator")
+    await send_slack(
+    "✅ ETL SUCCESS: etl_orchestrator\n"
+    "────────────────────────────\n"
+    "📥 API pipeline: completed\n"
+    "🗄️ DB pipeline: completed\n"
+    "📊 Excel pipeline: completed\n"
+    "🚀 All data loaded successfully")
   except Exception as e:
-    await send_slack("❌ ETL FAILED: etl_orchestrator")
+    await send_slack(
+    "❌ ETL FAILED: etl_orchestrator\n"
+    "────────────────────────────\n"
+    "⚠️ One or more pipelines failed\n"
+    "📥 Check API / DB / Excel stages in Prefect logs\n")
     raise e
   
   
