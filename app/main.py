@@ -1,256 +1,190 @@
 import sys
 import os
+import asyncio
+import logging
+import json
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-
 from prefect import flow, task
 from prefect.blocks.system import Secret
-#from prefect.blocks.system import Secret
-
-
-import asyncio
-import logging 
-import json
-from google.cloud import bigquery
-
-
-# Import all the other Files from Folders Here
 
 # Connectors
 from extract.api_connect import run_pipeline
-
 from extract.database_connect import extract_from_db
-
 from extract.file_connect import extract_xl_file
 
-
-
-#Save 
+# Save
 from save_raw.save_database_file import save_raw_db_data
-
 from save_raw.save_file_file import save_raw_execel_data
-
 from save_raw.save_raw_api import save_raw_api_data
 
+# Models
+from validate.models import SalesData, ProductsData, PaymentData
 
-#models 
-from validate.models import SalesData,ProductsData,PaymentData
-
-
-
-# validation 
+# Validation
 from validate.api_normalize import normalize_data
-
-
 from validate.validate_api import validate_api
-
 from validate.validate_database import validate_database_data
-
-
 from validate.validate_file import validate_file_data
 
-
-
-#Transform
+# Transform
 from transform.transform_api_data import transform_api_data
-
 from transform.transform_db import transform_database_data
-
 from transform.transform_file import transform_excel_data
 
-
-
-# Load_data imports 
+# Load
 from load_data.load_api import load_api_data_database
-
 from load_data.load_database import big_Query_client
-
 from load_data.load_file import load_file_data_database
 
 from app.file_sys import files_management
 
-
-
-
-
-
-
-
 logging.basicConfig(level=logging.INFO)
 
+# ------------------- API TASKS -------------------
 
-#SAAS API 
+@task
+async def api_extract_task(api_key):
+  return await run_pipeline(api_key)
 
-@task(name="API_Extract")
-async def api_extract_task():
-  x = await run_pipeline()
-  return x
-  
-@task(name =",Save_to_dlake")
+@task
 def save_raw_api_task(x):
   return save_raw_api_data(x)
-  
-@task(name="normalize_api_data")
+
+@task
 def normalize_api_data_task(k):
   return normalize_data(k)
 
-@task(name="validate_api_data")
-def validate_api_data_task(k,model):
-  return validate_api(k,model)
-  
-@task(name="transform_api_data")
-def transform_api_data_task(q,l):
-  return transform_api_data(q,l)
-  
-@task(name="load_api_data_database")
-async def load_api_data_database_task(z):
-  return await load_api_data_database(z)
+@task
+def validate_api_data_task(k, model):
+  return validate_api(k, model)
+
+@task
+def transform_api_data_task(q, l):
+  return transform_api_data(q, l)
+
+@task
+async def load_api_data_database_task(data, db_url):
+  return await load_api_data_database(data, db_url)
 
 
+# ------------------- DB TASKS -------------------
 
+@task(retries=3)
+async def extract_from_db_task(db_url):
+  return await extract_from_db(db_url)
 
-# DataBase 
-
-@task(name="extract_from_db",retries = 3)
-async def extract_from_db_task():
-  y = await extract_from_db()
-  return y 
-
-@task(name="save_db_raw_csv")
+@task
 def save_raw_db_data_task(y):
   return save_raw_db_data(y)
 
-@task(name="validate_database_data")
-def validate_database_data_task(y,model):
-  return validate_database_data(y,model)
-  
-@task(name="transform_database_data")  
-def transform_database_data_task(f,g):
-  return transform_database_data(f,g)
-  
-@task(name = "load_db_data_Big_Query")
-def load_db_data_big_query_task(m):
-  return big_Query_client(m)
-  
-  
-# Excel Files 
-@task(name="Excel Extract")
+@task
+def validate_database_data_task(y, model):
+  return validate_database_data(y, model)
+
+@task
+def transform_database_data_task(f, g):
+  return transform_database_data(f, g)
+
+@task
+def load_db_data_big_query_task(data, gcp_creds):
+  return big_Query_client(data, gcp_creds)
+
+
+# ------------------- FILE TASKS -------------------
+
+@task
 def extract_xl_file_task():
   return extract_xl_file()
- 
-@task(name="save_raw_execel_data")
+
+@task
 def save_raw_execel_data_task(d):
   return save_raw_execel_data(d)
-  
-@task(name="validate_file_data")
-def validate_file_data_task(d,model):
-  return validate_file_data(d,model)
 
-@task(name="transform_excel_data")
-def transform_excel_data_task(t,r):
-  return transform_excel_data(t,r)
-    
-@task(name="load_file_data_database")
-async def load_file_data_database_task(h):
-  await load_file_data_database(h)
+@task
+def validate_file_data_task(d, model):
+  return validate_file_data(d, model)
 
-  # Check Data Lake files 
-@task(name="Files files_management")
+@task
+def transform_excel_data_task(t, r):
+  return transform_excel_data(t, r)
+
+@task
+async def load_file_data_database_task(data, db_url):
+  return await load_file_data_database(data, db_url)
+
+@task
 def files_management_task():
   return files_management()
-  
 
 
+# ------------------- FLOWS -------------------
 
-#Apis main 
-@flow(name="API_flow", log_prints=True)
-async def main_flow_api():
-  " Main Prefect  Flow That Combine Everything "
-  raw_api = await api_extract_task()
-  
+@flow
+async def main_flow_api(api_key, db_url):
+  raw_api = await api_extract_task(api_key)
+
   if raw_api:
     save_raw_api_task(raw_api)
-    
+
     normal = normalize_api_data_task(raw_api)
-  
-    clean,unclean = validate_api_data_task(normal,PaymentData)
-    
-    records1 = transform_api_data_task(clean,unclean)
-  
-    await load_api_data_database_task(records1)
+
+    clean, unclean = validate_api_data_task(normal, PaymentData)
+
+    records = transform_api_data_task(clean, unclean)
+
+    await load_api_data_database_task(records, db_url)
   else:
-    print("No New API Data To Extract")
-    
-  
+    print("No API Data")
 
-# Databases 
-@flow(name="DB_flow", log_prints=True)
-async def main_flow_db():
-  """ From DB To DB/Warehouse """ 
-  
-  db_data = await extract_from_db_task()
-  
+
+@flow
+async def main_flow_db(db_url, gcp_creds):
+  db_data = await extract_from_db_task(db_url)
+
   save_raw_db_data_task(db_data)
-  
-  clean1,unclean1 = validate_database_data_task(db_data,ProductsData)
-  
-  records0 = transform_database_data_task(clean1,unclean1)
-  
-  load_db_data_big_query_task(records0)
-  
+
+  clean, unclean = validate_database_data_task(db_data, ProductsData)
+
+  records = transform_database_data_task(clean, unclean)
+
+  load_db_data_big_query_task(records, gcp_creds)
 
 
-#Excel 
-@flow(name="excel_flow", log_prints=True)
-async def main_flow_excel():
-  """from Excel to Database/cv/warehouse"""
-  # Excel files
+@flow
+async def main_flow_excel(db_url):
   xl_data = extract_xl_file_task()
+
   if xl_data:
     save_raw_execel_data_task(xl_data)
-    
-    clean0,unclean0 = validate_file_data_task(xl_data,SalesData)
-  
-    records2 = transform_excel_data_task(clean0,unclean0)
-    await load_file_data_database_task(records2)
+
+    clean, unclean = validate_file_data_task(xl_data, SalesData)
+
+    records = transform_excel_data_task(clean, unclean)
+
+    await load_file_data_database_task(records, db_url)
   else:
-    print("No Excel Files scanned")
-    
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
- 
+    print("No Excel Data")
+
+
+# ------------------- ORCHESTRATOR -------------------
+
 @flow(name="etl_orchestrator")
 async def etl_orchestrator():
-  """ Master Main of mains """
-  db_secret = await Secret.load("database-url")
-  db_secret.get()
-  api_secret = await Secret.load("api-key")
-  api_secret.get()
-  slack_secret = await Secret.load("slack-webhook")
-  slack_secret.get()
-  
-  gcp_secret = await Secret.load("gcp-credentials")
-  gcp_creds = gcp_secret.get()
-  
-# Flow 
-  await main_flow_api()
-  await main_flow_db()
-  await main_flow_excel()
-  files_management_task()
-  print("Services for local files")
-  
 
- 
+    #LOAD SECRETS CORRECTLY
+  db_url = (await Secret.load("database-url")).get()
+  api_key = (await Secret.load("api-key")).get()
+  
+  gcp_creds = (await Secret.load("gcp-credentials")).get()
+
+    # ruN FLOWS
+  await main_flow_api(api_key, db_url)
+  await main_flow_db(db_url, gcp_creds)
+  await main_flow_excel(db_url)
+
+  files_management_task()
   
   
   

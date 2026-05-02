@@ -24,69 +24,70 @@ load_dotenv()
 
 
 
-async def load_api_data_database(data):
-  """Loads The Transformed Data to Posgres Db"""
-  
-  db_url = os.getenv("DATABASE_URL").strip()
- # Connect and Optimize Database Connection  
-  engine = create_async_engine(db_url,echo=False,
-  pool_pre_ping=True,
-  pool_size=5,
-  max_overflow=10,)
-  
-  
+async def load_api_data_database(data, db_url):
+  """Loads API data to Postgres DB"""
+
+  if not db_url:
+    raise ValueError("DATABASE_URL is missing")
+
+  if not data:
+    logging.info("No API data to load")
+    return
+
+  db_url = db_url.strip()
+
+  engine = create_async_engine(
+        db_url,
+        echo=False,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10,
+    )
+
   metadata = MetaData()
-  # DB schemas and inserts/ Increamnetal with upserts 
+
   payments = Table(
-    "payments",
-    metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
+        "payments",
+        metadata,
+        Column("id", Integer, primary_key=True, autoincrement=True),
+        Column("external_id", String, unique=True),
+        Column("amount", Integer),
+        Column("amount_received", Integer),
+        Column("currency", String),
+        Column("status", String),
+        Column("created", Integer),
+        Column("order_id", String),
+        Column("product", String),
+        Column("channel", String),
+        Column("region", String),
+        Column("customer_type", String),
+    )
 
-    Column("external_id",String,unique=True),
-    Column("amount", Integer),
-    Column("amount_received", Integer),
-    Column("currency", String),
-    Column("status", String),
-    Column("created", Integer),
-    Column("order_id", String),
-    Column("product", String),
-    Column("channel", String),
-    Column("region", String),
-    Column("customer_type", String),)
-# For fast Query (indexes)
   Index("idx_payments", payments.c.id)
-
 
   async with engine.begin() as conn:
     await conn.run_sync(metadata.create_all)
 
-
   async with engine.begin() as conn:
     stmt = upsert(payments).values(data)
-
     stmt = stmt.on_conflict_do_update(
-        index_elements=["external_id"],  
-        set_={
-      "id": stmt.excluded.id,
-     "amount": stmt.excluded.amount,
-     "amount_received": stmt.excluded.amount_received,
-     "currency": stmt.excluded.currency,
-     "status": stmt.excluded.status,
-     "created": stmt.excluded.created,
-     "order_id": stmt.excluded.order_id,
-     "product": stmt.excluded.product,
-     "channel": stmt.excluded.channel,
-     "region": stmt.excluded.region,
-     "customer_type": stmt.excluded.customer_type,
-        },
-    )
+            index_elements=["external_id"],
+            set_={
+                "amount": stmt.excluded.amount,
+                "amount_received": stmt.excluded.amount_received,
+                "currency": stmt.excluded.currency,
+                "status": stmt.excluded.status,
+                "created": stmt.excluded.created,
+                "order_id": stmt.excluded.order_id,
+                "product": stmt.excluded.product,
+                "channel": stmt.excluded.channel,
+                "region": stmt.excluded.region,
+                "customer_type": stmt.excluded.customer_type,
+            },
+        )
 
     await conn.execute(stmt)
-  logging.info("Data in updated to Db")  
-    
 
+  logging.info("API Data inserted/updated in DB")
 
-
-  await asyncio.sleep(0.3)
-  
   await engine.dispose()

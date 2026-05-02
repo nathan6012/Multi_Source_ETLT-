@@ -12,8 +12,6 @@ from aiolimiter import AsyncLimiter
 logging.getLogger().setLevel(logging.INFO)
 
 
-load_dotenv()
-API_KEY = os.getenv("API_KEY")
 limiter = AsyncLimiter(5, 1)
 
 # -----------------------------
@@ -63,43 +61,40 @@ def save_checkpoint(starting_after):
 
 
 
-
-
-
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=1, max=10)
 )
 async def fetch(client, starting_after=None):
-  """ httpx  Extract Logic """
+  """httpx Extract Logic"""
   async with limiter:
     params = {"limit": 100}
-
     if starting_after:
       params["starting_after"] = starting_after
-        
-        
+
     resp = await client.get(
-        # Change url and endpoint 
             "https://api.stripe.com/v1/payment_intents",
             params=params
         )
 
+      
+    if resp.status_code == 401:
+            raise ValueError("Invalid Stripe API key (401)")
+
     resp.raise_for_status()
     return resp.json()
-
-
-#Pipeline 
-async def run_pipeline():
+    
+    
+    
+async def run_pipeline(api_key):
   logging.info("Starting Stripe ETL job")
 
-  all_data = [] # container 
-
-    # restore state if exists
+  all_data = []
   starting_after = load_checkpoint()
 
   headers = {
-        "Authorization": f"Bearer {API_KEY}"}
+        "Authorization": f"Bearer {api_key.strip()}"
+    }
 
   async with httpx.AsyncClient(timeout=10, headers=headers) as client:
     while True:
@@ -114,16 +109,15 @@ async def run_pipeline():
         starting_after = items[-1]["id"]
         save_checkpoint(starting_after)
 
-  # stop condition
+            # ✅ stop condition
       if not data.get("has_more"):
         break
 
   logging.info(f"Finished. Total api records: {len(all_data)}")
+  return all_data    
 
-  return all_data
 
 
-# Testsing 
 
 
   

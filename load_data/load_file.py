@@ -21,53 +21,57 @@ logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
 
-async def load_file_data_database(data):
-  """Loads The Transformed Data to Posgres Db"""
-  
-  db_url = os.getenv("DATABASE_URL").strip()
-  
-  engine = create_async_engine(db_url,echo=False,
-  pool_pre_ping=True,
-  pool_size=5,
-  max_overflow=10,) # DB connection optimazation 
-  
+async def load_file_data_database(data, db_url):
+  """Loads transformed data to Postgres DB"""
+
+  if not db_url:
+    raise ValueError("DATABASE_URL is missing")
+
+  db_url = db_url.strip()
+
+  engine = create_async_engine(
+        db_url,
+        echo=False,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10,
+    )
+
   metadata = MetaData()
-  
+
   full_orders = Table(
-    "full_orders",
-    metadata,
-# Sql load Schemas 
-    Column("order_id", Integer, primary_key=True),
-    Column("customer", String),
-    Column("region", String),
-    Column("product", String),
-    Column("quantity", Integer),
-    Column("unit_price", Integer),
-    Column("cost_per_unit", Float),
-    Column("order_date", DateTime),)
-  
-  async with engine.begin() as conn:
-    await conn.run_sync(metadata.create_all)  
-
+        "full_orders",
+        metadata,
+        Column("order_id", Integer, primary_key=True),
+        Column("customer", String),
+        Column("region", String),
+        Column("product", String),
+        Column("quantity", Integer),
+        Column("unit_price", Integer),
+        Column("cost_per_unit", Float),
+        Column("order_date", DateTime),
+    )
 
   async with engine.begin() as conn:
-    # Helps for remove Dups using id 
+    await conn.run_sync(metadata.create_all)
+
+  async with engine.begin() as conn:
     stmt = upsert(full_orders).values(data)
-
     stmt = stmt.on_conflict_do_update(
-    index_elements=["order_id"],
-    set_={
-    "customer": stmt.excluded.customer,
-     "region": stmt.excluded.region,
-     "product": stmt.excluded.product,
-    "quantity": stmt.excluded.quantity,
-     "unit_price": stmt.excluded.unit_price,
-    "cost_per_unit": stmt.excluded.cost_per_unit,
-    "order_date": stmt.excluded.order_date,
-    },)
+            index_elements=["order_id"],
+            set_={
+                "customer": stmt.excluded.customer,
+                "region": stmt.excluded.region,
+                "product": stmt.excluded.product,
+                "quantity": stmt.excluded.quantity,
+                "unit_price": stmt.excluded.unit_price,
+                "cost_per_unit": stmt.excluded.cost_per_unit,
+                "order_date": stmt.excluded.order_date,
+            },
+        )
 
-    await conn.execute(stmt)  
-  
-  logging.info("Execel Data into Db/updated")  
+    await conn.execute(stmt)
+
+  logging.info("Excel Data inserted/updated in DB")
+
   await engine.dispose()
-  

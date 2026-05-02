@@ -41,36 +41,41 @@ async def fetch_table_data(conn: AsyncConnection, table: Table) -> list[dict]:
 
 
 
-async def extract_from_db():
-  """ connect to Database / warehouse  and Extract desired table Data for processing  """
-  
-  db_url = os.getenv("DATABASE_URL").strip()
-  
-  engine = create_async_engine(db_url,echo=False,
-  pool_pre_ping=True,
-  pool_size=5,
-  max_overflow=10,)
-  
+async def extract_from_db(db_url):
+  """Connect to DB and extract data"""
+
+  db_url = db_url.strip()
+
+  engine = create_async_engine(
+        db_url,
+        echo=False,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10,
+    )
+
   metadata = MetaData()
-  
-#  x = table in db we want 
+
   async with engine.connect() as conn:
-    production_analytics_fusion = await get_table(conn, "production_analytics_fusion", metadata)
-    
-    production_analytics_fusion_data = await fetch_table_data(conn, production_analytics_fusion) if production_analytics_fusion is not None  else [] 
-  
+    production_analytics_fusion = await get_table(
+            conn, "production_analytics_fusion", metadata
+        )
+
+    production_analytics_fusion_data = (
+            await fetch_table_data(conn, production_analytics_fusion)
+            if production_analytics_fusion is not None
+            else []
+        )
+
+
   await engine.dispose()
-  #print(production_analytics_fusion_data)
-  logging.info(f"Data Extracted From Database: { len(production_analytics_fusion_data)}")
-  
-  return production_analytics_fusion_data
-  
+
+  logging.info(
+        f"Data Extracted From Database: {len(production_analytics_fusion_data)}"
+    )
+
+  return production_analytics_fusion_data 
 # Remove after test   
-async def main():
-  await extract_from_db()
-if __name__=="__main__":
-  asyncio.run(main())
-  
   
   
   
