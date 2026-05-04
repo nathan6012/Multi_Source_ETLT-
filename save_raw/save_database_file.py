@@ -41,7 +41,7 @@ def save_raw_db_data(data,endpoint, access_key, secret_key):
     s3.head_object(Bucket=bucket, Key=key)
     logging.info("✅ Upload confirmed in R2")
   except Exception as e:
-    logging.warning("❌ Upload not found in R2:", e)  
+    logging.warning(f"❌ Upload not found in R2:", e)  
 
   
   

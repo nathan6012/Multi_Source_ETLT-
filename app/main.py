@@ -159,11 +159,12 @@ async def main_flow_api(api_key, db_url, endpoint, access_key, secret_key):
     print("No API Data")
 
 
-@flow
+@flow(log_prints=True)
 async def main_flow_db(db_url, gcp_creds, endpoint, access_key, secret_key):
   
   print("Data To Big query Migration Etl logic")
   db_data = await extract_from_db_task(db_url)
+  print(len(db_data))
 
   save_raw_db_data_task(db_data, endpoint, access_key, secret_key)
 
