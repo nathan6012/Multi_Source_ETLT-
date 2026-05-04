@@ -9,6 +9,7 @@ import pandas as pd
 from pathlib import Path
 import boto3
 
+# from io import BytesIO for streaming in memory rather than saving first 
 
 
 

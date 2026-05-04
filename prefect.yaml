@@ -1,7 +1,5 @@
 name: my-etl-project
-# Locked to your requested version
 prefect-version: 3.6.23
-
 pull:
   - prefect.deployments.steps.git_clone:
       repository: https://github.com/nathan6012/Multi_Source_ETLT-.git
@@ -13,7 +11,6 @@ pull:
       script: |
         pip install --upgrade pip
         pip install -r requirements.txt
-      # This fixes the "No such file or directory" error for your requirements.txt
       directory: "{{ clone_step.directory }}"
 
 deployments:
@@ -25,17 +22,17 @@ deployments:
     on_completion:
       - app.main.notify_success
     
-    
     job_variables:
       env: {} 
     work_pool:
       name: My_etl_System
 
-   # schedule:
-     # cron: "0 5 */2 * *"
-    #  timezone: "UTC"  
+    #schedule:
+    #  cron: "*/5 * * * *"
+      #timezone: "UTC"  
+    
     schedule:
-      cron: "*/5 * * * *"
+      cron: "0 0 * * *"
       timezone: "UTC"  
 
     tags: ["etl"]
