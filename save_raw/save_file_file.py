@@ -27,19 +27,25 @@ def save_raw_execel_data(data,endpoint, access_key, secret_key):
         aws_secret_access_key=secret_key,
         region_name="auto"
     )
+    
   df = pd.DataFrame(data)
-  
+
   buffer = StringIO()
   df.to_json(buffer, orient="records", lines=True)
   buffer.seek(0)
-  
+
   s3.put_object(
-        Bucket=bucket,
-        Key="multi-src/json/full_orders.json",
-        Body=buffer.getvalue().encode("utf-8"),
-        ContentType="application/json"
-    )
-  logging.info("Data for excel loaded to Datalake")  
+    Bucket=bucket,
+    Key="multi-src/json/full_orders.json",
+    Body=buffer.getvalue().encode("utf-8"),
+    ContentType="application/json")
+
+  logging.info("JSON data loaded to R2 data lake")  
+    
+    
+    
+    
+    
 
   
 

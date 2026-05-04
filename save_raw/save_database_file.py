@@ -8,15 +8,15 @@ from datetime import datetime
 import pandas as pd
 
 import boto3
+import io
 from io import StringIO
+
 
 
 logging.getLogger().setLevel(logging.INFO)
 
-def save_raw_db_data(data,endpoint, access_key, secret_key):
-  
-  """Just saves our data to csv for any emergency can be persisted to S3/R2"""
-  
+
+def save_raw_db_data(data, endpoint, access_key, secret_key):
   bucket = "nathan-elt-buck"
   s3 = boto3.client(
         "s3",
@@ -25,25 +25,26 @@ def save_raw_db_data(data,endpoint, access_key, secret_key):
         aws_secret_access_key=secret_key,
         region_name="auto"
     )
+    
   df = pd.DataFrame(data)
-  
-  buffer = StringIO()
-  df.to_csv(buffer, index=False)  # CSV instead o
+    
+    # Create a binary buffer
+  buffer = io.BytesIO()
+    
+    # Write the CSV to the buffer
+  df.to_csv(buffer, index=False, encoding='utf-8')
+    
+    # --- THE FIX ---
+    # Move the pointer back to the start of the buffer so boto3 can read the content
   buffer.seek(0)
-  
+    # ----------------
+    
   s3.put_object(
         Bucket=bucket,
-        Key="multi-src/csv/production.csv",  # CSV
-        Body=buffer.getvalue().encode("utf-8"),
+        Key="multi-src/csv/production.csv",
+        Body=buffer,  # boto3 will now read from the start of the buffer
         ContentType="text/csv"
     )
-    
-  Key="multi-src/csv/production.csv"
-  
-  
-  try:
-    s3.head_object(Bucket=bucket, Key=key)
-    logging.info("✅ Upload confirmed in R2")
-  except Exception as e:
-    logging.warning(f"❌ Upload not found  {e}")
+   
+   
     
