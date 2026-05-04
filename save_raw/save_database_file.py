@@ -30,13 +30,17 @@ def save_raw_db_data(data, endpoint, access_key, secret_key):
   df = pd.DataFrame(data)
 
     # convert directly to bytes (no StringIO)
-  csv_bytes = df.to_csv(index=False).encode("utf-8")
+
+  json_str = df.to_json(orient="records", lines=True)
 
   s3.put_object(
         Bucket=bucket,
-        Key="multi-src/csv/production.csv",
-        Body=csv_bytes,
-        ContentType="text/csv"
+        Key="multi-src/json/production.json",
+        Body=json_str.encode("utf-8"),
+        ContentType="application/json"
     )
 
-  logging.info("Upload successful")
+  logging.info("Payments JSON uploaded to R2 data lake")
+  
+
+  
