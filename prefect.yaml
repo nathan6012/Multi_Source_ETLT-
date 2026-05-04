@@ -31,8 +31,11 @@ deployments:
     work_pool:
       name: My_etl_System
 
+   # schedule:
+     # cron: "0 5 */2 * *"
+    #  timezone: "UTC"  
     schedule:
-      cron: "0 5 */2 * *"
+      cron: "*/5 * * * *"
       timezone: "UTC"  
 
     tags: ["etl"]

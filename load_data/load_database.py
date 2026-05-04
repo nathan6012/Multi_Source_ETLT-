@@ -16,6 +16,8 @@ logging.basicConfig(level=logging.INFO)
 
 
 
+
+
 def big_Query_client(data, gcp_creds):
   """Loads data to BigQuery"""
 
@@ -34,17 +36,6 @@ def big_Query_client(data, gcp_creds):
   df = pd.DataFrame(data)
   logging.info(f"data schemas: {df.dtypes}")
 
-    # optional temp storage (you can remove later)
-  cwd = Path(__file__).resolve().parent
-  root_dir = cwd.parent
-  sub_folder = root_dir / "local"
-  sub_folder.mkdir(parents=True, exist_ok=True)
-
-  csv_path = sub_folder / "production.csv"
-  df.to_csv(csv_path, index=False)
-
-  logging.info(f"Data staged at: {csv_path}")
-
   table_id = "calm-sky-419511.Nathanelt_sales.production"
 
   job_config = bigquery.LoadJobConfig(
@@ -52,6 +43,7 @@ def big_Query_client(data, gcp_creds):
         write_disposition=bigquery.WriteDisposition.WRITE_APPEND
     )
 
+    # IN-MEMORY LOAD (no CSV file
   job = client.load_table_from_dataframe(
         df,
         table_id,

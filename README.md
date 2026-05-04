@@ -1,6 +1,7 @@
-# 🚀 ETL Data Engineering Pipeline System
+## ETL Data Engineering Pipeline System
 
 ![Prefect](https://img.shields.io/badge/Orchestration-Prefect-06b6d4)
+![Storage](https://img.shields.io/badge/Data%20Lake-S3%20Compatible-007ACC?logo=amazons3&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Data-Pandas-black)
 ![SQLAlchemy](https://img.shields.io/badge/Database-SQLAlchemy-red)
 ![Neon PostgreSQL](https://img.shields.io/badge/Storage-Neon%20PostgreSQL-00E599?logo=postgresql&logoColor=white)
@@ -21,7 +22,7 @@ It supports:
 - Excel files  
 - Local file ingestion  
 
-All data is standardized into a unified model for analytics and reporting.
+All data  from Business multi sources transformed ,modeled and standardized into a unified model/location  for analytics and reporting.
 
 ---
 
@@ -57,7 +58,7 @@ This pipeline solves that by providing:
 - Analytics-ready dataset generation
 
 ### 🗄️ Data Storage Layer
-- Raw data lake storage
+- S3/R2 Cloud  data lake storage
 - Staging database tables
 - Final analytics-ready tables (Postgres / BigQuery)
 
@@ -103,9 +104,9 @@ extract/      → Data source connectors (API, DB, files)
 validate/     → Schema validation & quality rules  
 transform/    → Business logic & transformations  
 load_data/    → Database & warehouse loaders  
-save_raw/     → Raw data persistence layer  
+save_raw/     →  S3/R2 Datalake
 local/        → Local file ingestion (Excel uploads)  
-datalake/     → Raw + processed data storage  
+datalake/     → R2 processed data storage  
 
 ---
 
@@ -135,6 +136,7 @@ The pipeline produces:
 - PostgreSQL (Neon)  
 - Google BigQuery  
 - Pandas  
+- boto3
 - SQLAlchemy  
 - Pydantic  
 - HTTPX  
@@ -182,6 +184,8 @@ python -m venv venv
 source venv/bin/activate   # Mac/Linux
 venv\Scripts\activate    
 
+# make sure to get all creditentials 
+
 ### 1. Clone repository
 ```bash
 git clone https://github.com/nathan6012/Multi_Source_ETLT-.git
@@ -190,8 +194,7 @@ explore the code and project Structure { focus on app/main}
 
 pip install -r requirements.txt
 
-python -m app.main
-
+python -m app.main or navigate around the project folder in your System 
 
 
 

@@ -37,10 +37,6 @@ async def fetch_table_data(conn: AsyncConnection, table: Table) -> list[dict]:
   return [dict(row._mapping) for row in rows]
 
 
-
-
-
-
 async def extract_from_db(db_url):
   """Connect to DB and extract data"""
 
@@ -75,10 +71,8 @@ async def extract_from_db(db_url):
     )
 
   return production_analytics_fusion_data 
-# Remove after test   
-  
-  
-  
+# Remove after test
+
   
   
   

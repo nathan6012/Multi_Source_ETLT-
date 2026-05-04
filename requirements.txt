@@ -7,6 +7,7 @@ google-cloud-bigquery
 pyarrow
 pandas-gbq
 requests
+boto3
 
 numpy<3
 openpyxl

@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from prefect import flow, task
 from prefect.blocks.system import Secret
+#from prefect.blocks.system import String 
 import requests
 
 # Connectors
@@ -63,8 +64,8 @@ async def api_extract_task(api_key):
   return await run_pipeline(api_key)
 
 @task
-def save_raw_api_task(x):
-  return save_raw_api_data(x)
+def save_raw_api_task(x, endpoint, access_key, secret_key):
+  return save_raw_api_data(x, endpoint, access_key, secret_key)
 
 @task
 def normalize_api_data_task(k):
@@ -90,8 +91,8 @@ async def extract_from_db_task(db_url):
   return await extract_from_db(db_url)
 
 @task
-def save_raw_db_data_task(y):
-  return save_raw_db_data(y)
+def save_raw_db_data_task(y, endpoint, access_key, secret_key):
+  return save_raw_db_data(y, endpoint, access_key, secret_key)
 
 @task
 def validate_database_data_task(y, model):
@@ -113,8 +114,8 @@ def extract_xl_file_task():
   return extract_xl_file()
 
 @task
-def save_raw_execel_data_task(d):
-  return save_raw_execel_data(d)
+def save_raw_execel_data_task(d, endpoint, access_key, secret_key):
+  return save_raw_execel_data(d, endpoint, access_key, secret_key)
 
 @task
 def validate_file_data_task(d, model):
@@ -129,24 +130,29 @@ async def load_file_data_database_task(data, db_url):
   return await load_file_data_database(data, db_url)
 
 @task
-def files_management_task():
-  return files_management()
+def files_management_task(endpoint, access_key, secret_key):
+  return files_management(endpoint, access_key, secret_key)
 
 
 # ------------------- FLOWS -------------------
 
-@flow
-async def main_flow_api(api_key, db_url):
+@flow(log_prints=True)
+async def main_flow_api(api_key, db_url, endpoint, access_key, secret_key):
   raw_api = await api_extract_task(api_key)
+  print(len(raw_api))
+  
 
   if raw_api:
-    save_raw_api_task(raw_api)
+    save_raw_api_task(raw_api, endpoint, access_key, secret_key)
 
     normal = normalize_api_data_task(raw_api)
+    print(len(normal))
 
     clean, unclean = validate_api_data_task(normal, PaymentData)
 
     records = transform_api_data_task(clean, unclean)
+    print(len(records))
+    
 
     await load_api_data_database_task(records, db_url)
   else:
@@ -154,28 +160,33 @@ async def main_flow_api(api_key, db_url):
 
 
 @flow
-async def main_flow_db(db_url, gcp_creds):
+async def main_flow_db(db_url, gcp_creds, endpoint, access_key, secret_key):
+  
+  print("Data To Big query Migration Etl logic")
   db_data = await extract_from_db_task(db_url)
 
-  save_raw_db_data_task(db_data)
+  save_raw_db_data_task(db_data, endpoint, access_key, secret_key)
 
   clean, unclean = validate_database_data_task(db_data, ProductsData)
 
   records = transform_database_data_task(clean, unclean)
+  print(len(records))
 
   load_db_data_big_query_task(records, gcp_creds)
 
 
 @flow
-async def main_flow_excel(db_url):
+async def main_flow_excel(db_url, endpoint, access_key, secret_key):
+  print("Excel Etl Logic Runngin")
   xl_data = extract_xl_file_task()
 
   if xl_data:
-    save_raw_execel_data_task(xl_data)
+    save_raw_execel_data_task(xl_data, endpoint, access_key, secret_key)
 
     clean, unclean = validate_file_data_task(xl_data, SalesData)
 
     records = transform_excel_data_task(clean, unclean)
+    print(len(records))
 
     await load_file_data_database_task(records, db_url)
   else:
@@ -184,41 +195,48 @@ async def main_flow_excel(db_url):
 
 # ------------------- ORCHESTRATOR -------------------
 
-@flow(name="etl_orchestrator",log_prints=True)
+@flow(name="etl_orchestrator", log_prints=True)
 async def etl_orchestrator():
 
-    #LOAD SECRETS CORRECTLY
+    # Load secrets
   db_url = (await Secret.load("database-url")).get()
+  
   api_key = (await Secret.load("api-key")).get()
   
   gcp_creds = (await Secret.load("gcp-credentials")).get()
 
-    # ruN FLOWS
+  endpoint = (await Secret.load("aws-endpoint-url")).get()
+  
+  access_key = (await Secret.load("aws-access-key-id")).get()
+  
+  secret_key = (await Secret.load("aws-secret-access-key")).get()
+
   try:
-    
-    await main_flow_api(api_key, db_url)
-    await main_flow_db(db_url, gcp_creds)
-    await main_flow_excel(db_url)
-    files_management_task()
-    
+    await main_flow_api(api_key, db_url, endpoint, access_key, secret_key)
+
+    await main_flow_db(db_url, gcp_creds, endpoint, access_key, secret_key)
+
+    await main_flow_excel(db_url, endpoint, access_key, secret_key)
+
+    files_management_task(endpoint, access_key, secret_key)
+
     await send_slack(
-    "✅ ETL SUCCESS: etl_orchestrator\n"
-    "────────────────────────────\n"
-    "📥 API pipeline: completed\n"
-    "🗄️ DB pipeline: completed\n"
-    "📊 Excel pipeline: completed\n"
-    "🚀 All data loaded successfully")
+            "✅ ETL SUCCESS: etl_orchestrator\n"
+            "────────────────────────────\n"
+            "📥 API pipeline: completed\n"
+            "🗄️ DB pipeline: completed\n"
+            "📊 Excel pipeline: completed\n"
+            "🚀 All data loaded successfully"
+        )
+
   except Exception as e:
     await send_slack(
-    "❌ ETL FAILED: etl_orchestrator\n"
-    "────────────────────────────\n"
-    "⚠️ One or more pipelines failed\n"
-    "📥 Check API / DB / Excel stages in Prefect logs\n")
-    raise e
-  
-  
-  
-  
+            "❌ ETL FAILED: etl_orchestrator\n"
+            "────────────────────────────\n"
+            "⚠️ One or more pipelines failed\n"
+            "📥 Check API / DB / Excel stages in Prefect logs\n"
+        )
+    raise e  
   
   
   

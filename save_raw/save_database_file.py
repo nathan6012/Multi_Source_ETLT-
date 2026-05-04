@@ -3,33 +3,42 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import json
-from pathlib import Path
 import logging 
 from datetime import datetime
 import pandas as pd
 
+import boto3
+from io import StringIO
+
+
 logging.getLogger().setLevel(logging.INFO)
 
-def save_raw_db_data(data):
+def save_raw_db_data(data,endpoint, access_key, secret_key):
+  
   """Just saves our data to csv for any emergency can be persisted to S3/R2"""
   
-  cwd = Path(__file__).resolve().parent
-  root_dir = cwd.parent
-  sub_folder = root_dir/"datalake"
-
-  sub_folder.mkdir(parents=True, exist_ok=True)
-  
-  # Data tracking for Backfils 
-  ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-  
-  filename = f"database_data_{ts}.csv"
-  
-  
-  file = sub_folder/ filename
-  
+  bucket = "nathan-elt-buck"
+  s3 = boto3.client(
+        "s3",
+        endpoint_url=endpoint,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name="auto"
+    )
   df = pd.DataFrame(data)
-  raw_data = df.to_csv(file,index=False)
   
-  logging.info("File uploaded to data_lake as csv")
+  buffer = StringIO()
+  df.to_csv(buffer, index=False)  # CSV instead o
+  buffer.seek(0)
+  
+  s3.put_object(
+        Bucket=bucket,
+        Key="multi-src/csv/production.csv",  # CSV 
+        Body=buffer.getvalue().encode("utf-8"),
+        ContentType="text/csv"
+    )
+
+  
+  
   
 
