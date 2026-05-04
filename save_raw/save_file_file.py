@@ -6,10 +6,8 @@ import json
 import logging 
 from datetime import datetime
 import pandas as pd
-
+from pathlib import Path
 import boto3
-import io
-from io import StringIO
 
 
 
@@ -19,6 +17,12 @@ logging.getLogger().setLevel(logging.INFO)
 
 def save_raw_execel_data(data,endpoint, access_key, secret_key):
   """Just saves our data to json for any emergency can be persisted to S3/R2"""
+  dir_url = Path(__file__).resolve().parent
+  root_dir = dir_url.parent
+  sub_folder = root_dir/"datalake"
+  sub_folder.mkdir(parents=True, exist_ok=True)
+  
+  file_path = sub_folder/"full_orders.json"
   
   bucket = "nathan-elt-buck"
   s3 = boto3.client(
@@ -28,21 +32,23 @@ def save_raw_execel_data(data,endpoint, access_key, secret_key):
         aws_secret_access_key=secret_key,
         region_name="auto"
     )
-    
+  
+  
   df = pd.DataFrame(data)
 
-  buffer = StringIO()
-  df.to_json(buffer, orient="records", lines=True)
-  buffer.seek(0)
+    # save locally
+  df.to_json(file_path, orient="records", lines=True)
 
-  s3.put_object(
-    Bucket=bucket,
-    Key="multi-src/json/full_orders.json",
-    Body=buffer.getvalue().encode("utf-8"),
-    ContentType="application/json")
+    # upload to R2
+  with open(file_path, "rb") as f:
+    s3.put_object(
+      Bucket=bucket,
+      Key="multi-src/json/full_orders.json",
+      Body=f,
+      ContentType="application/json"
+        )
 
-  logging.info("JSON data loaded to R2 data lake")  
-    
+  logging.info("JSON data loaded to R2 data lake")
     
     
     

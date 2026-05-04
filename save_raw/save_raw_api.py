@@ -21,6 +21,14 @@ logging.getLogger().setLevel(logging.INFO)
 def save_raw_api_data(data,endpoint,access_key,secret_key):
   """Just saves our data to json for any emergency can be persisted to S3/R2"""
   
+  dir_url = Path(__file__).resolve().parent
+  root_dir = dir_url.parent
+  sub_folder = root_dir/"datalake"
+  sub_folder.mkdir(parents=True, exist_ok=True)
+  
+  file_path = sub_folder/"payments.json"
+  
+  
   bucket = "nathan-elt-buck"
   s3 = boto3.client(
         "s3",
@@ -29,23 +37,21 @@ def save_raw_api_data(data,endpoint,access_key,secret_key):
         aws_secret_access_key=secret_key,
         region_name="auto"
     )
+  
+  df = pd.DataFrame(data)  
+  df.to_json(file_path, orient="records", lines=True)
+  
+  with open(file_path, "rb") as f:
+    s3.put_object(
+      Bucket=bucket,
+      Key="multi-src/json/payments.json",
+      Body=f,
+      ContentType="application/json"
+        )
+
+  logging.info("JSON data loaded to R2 data lake")
     
-  df = pd.DataFrame(data)
-
-  buffer = StringIO()
-  df.to_json(buffer, orient="records", lines=True)
-  buffer.seek(0)
-  s3.put_object(
-        Bucket=bucket,
-        Key="multi-src/json/payments.json",
-        Body=buffer.getvalue().encode("utf-8"),
-        ContentType="application/json"
-    )
-  logging.info("File loaded to Datalake")  
-
-
-
-
+    
   
   
  
