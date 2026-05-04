@@ -18,18 +18,10 @@ from io import StringIO
 
 logging.getLogger().setLevel(logging.INFO)
 
-def save_raw_api_data(data,endpoint,access_key,secret_key):
-  """Just saves our data to json for any emergency can be persisted to S3/R2"""
-  
-  dir_url = Path(__file__).resolve().parent
-  root_dir = dir_url.parent
-  sub_folder = root_dir/"datalake"
-  sub_folder.mkdir(parents=True, exist_ok=True)
-  
-  file_path = sub_folder/"payments.json"
-  
-  
-  bucket = "nathan-elt-buck"
+
+def save_raw_api_data(data, endpoint, access_key, secret_key):
+  """Save API data directly to R2 (no local files)"""
+
   s3 = boto3.client(
         "s3",
         endpoint_url=endpoint,
@@ -37,21 +29,20 @@ def save_raw_api_data(data,endpoint,access_key,secret_key):
         aws_secret_access_key=secret_key,
         region_name="auto"
     )
-  
-  df = pd.DataFrame(data)  
-  df.to_json(file_path, orient="records", lines=True)
-  
-  with open(file_path, "rb") as f:
-    s3.put_object(
-      Bucket=bucket,
-      Key="multi-src/json/payments.json",
-      Body=f,
-      ContentType="application/json"
-        )
 
-  logging.info("JSON data loaded to R2 data lake")
-    
-    
+  bucket = "nathan-elt-buck"
+
+  df = pd.DataFrame(data)
+
+    # convert directly to JSON string in memory
+  json_str = df.to_json(orient="records", lines=True)
+
+  s3.put_object(
+        Bucket=bucket,
+        Key="multi-src/json/payments.json",
+        Body=json_str.encode("utf-8"),
+        ContentType="application/json"
+    )
+
+  logging.info("Payments JSON uploaded to R2 data lake")
   
-  
- 

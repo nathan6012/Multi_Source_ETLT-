@@ -18,42 +18,30 @@ logging.getLogger().setLevel(logging.INFO)
 
 def save_raw_execel_data(data,endpoint, access_key, secret_key):
   """Just saves our data to json for any emergency can be persisted to S3/R2"""
-  dir_url = Path(__file__).resolve().parent
-  root_dir = dir_url.parent
-  sub_folder = root_dir/"datalake"
-  sub_folder.mkdir(parents=True, exist_ok=True)
-  
-  file_path = sub_folder/"full_orders.json"
-  
-  bucket = "nathan-elt-buck"
+    
   s3 = boto3.client(
-        "s3",
-        endpoint_url=endpoint,
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        region_name="auto"
+   "s3",
+  endpoint_url=endpoint,
+  aws_access_key_id=access_key,
+  aws_secret_access_key=secret_key,
+  region_name="auto"
     )
-  
-  
+
+  bucket = "nathan-elt-buck"
+
   df = pd.DataFrame(data)
 
-    # save locally
-  df.to_json(file_path, orient="records", lines=True)
+    # convert to JSON string in memory (no file)
+  json_str = df.to_json(orient="records", lines=True)
 
-    # upload to R2
-  with open(file_path, "rb") as f:
-    s3.put_object(
-      Bucket=bucket,
-      Key="multi-src/json/full_orders.json",
-      Body=f,
-      ContentType="application/json"
-        )
+  s3.put_object(
+        Bucket=bucket,
+        Key="multi-src/json/full_orders.json",
+        Body=json_str.encode("utf-8"),
+        ContentType="application/json"
+    )
 
-  logging.info("JSON data loaded to R2 data lake")
-    
-    
-    
-    
+  logging.info("JSON uploaded to R2")  
 
   
 
