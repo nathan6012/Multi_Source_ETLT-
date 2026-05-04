@@ -27,24 +27,20 @@ def save_raw_db_data(data, endpoint, access_key, secret_key):
     )
     
   df = pd.DataFrame(data)
-    
-    # Create a binary buffer
+  logging.info(f"Uploading {len(df)} rows...") # If this is 0, the bucket stays empty.
+
+# ... (inside your function)
+
   buffer = io.BytesIO()
-    
-    # Write the CSV to the buffer
   df.to_csv(buffer, index=False, encoding='utf-8')
-    
-    # --- THE FIX ---
-    # Move the pointer back to the start of the buffer so boto3 can read the content
-  buffer.seek(0)
-    # ----------------
-    
+
+# Use .getvalue() to send the actual data content, not the stream object
   s3.put_object(
-        Bucket=bucket,
-        Key="multi-src/csv/production.csv",
-        Body=buffer,  # boto3 will now read from the start of the buffer
-        ContentType="text/csv"
-    )
-   
+    Bucket=bucket,
+    Key="multi-src/csv/production.csv",
+    Body=buffer.getvalue(),  # This sends the raw bytes directly
+    ContentType="text/csv")
+    
+
    
     
