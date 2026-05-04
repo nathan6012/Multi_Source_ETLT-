@@ -17,6 +17,7 @@ logging.getLogger().setLevel(logging.INFO)
 load_dotenv()
 
 
+
 # Inspector Object 
 async def get_table(conn: AsyncConnection, table_name: str, metadata: MetaData) -> Table | None:
   """Return a Table object if it exists in the database, else None."""
@@ -69,11 +70,12 @@ async def extract_from_db(db_url):
   logging.info(
         f"Data Extracted From Database: {len(production_analytics_fusion_data)}"
     )
+    
 
   return production_analytics_fusion_data 
 # Remove after test
 
-  
+
   
   
   

@@ -33,10 +33,15 @@ def save_raw_db_data(data,endpoint, access_key, secret_key):
   
   s3.put_object(
         Bucket=bucket,
-        Key="multi-src/csv/production.csv",  # CSV 
+        Key="multi-src/csv/production.csv",  # CSV
         Body=buffer.getvalue().encode("utf-8"),
         ContentType="text/csv"
     )
+  try:
+    s3.head_object(Bucket=bucket, Key=key)
+    logging.info("✅ Upload confirmed in R2")
+  except Exception as e:
+    logging.warning("❌ Upload not found in R2:", e)  
 
   
   
