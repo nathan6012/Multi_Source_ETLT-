@@ -32,8 +32,8 @@ deployments:
       #timezone: "UTC"  
     
     schedule:
-      cron: "0 0 * * *"
-      timezone: "UTC"  
+      cron: "0 5 * * *"
+      timezone: "Africa/Kampala"
 
     tags: ["etl"]
     retries: 2
