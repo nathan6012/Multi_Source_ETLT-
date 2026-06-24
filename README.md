@@ -1,202 +1,471 @@
-## ETL Data Engineering Pipeline System
+# ETL/ELT Data Engineering Pipeline System
 
 ![Prefect](https://img.shields.io/badge/Orchestration-Prefect-06b6d4)
-![Storage](https://img.shields.io/badge/Data%20Lake-S3%20Compatible-007ACC?logo=amazons3&logoColor=white)
+![BigQuery](https://img.shields.io/badge/Data%20Warehouse-BigQuery-4285F4?logo=googlecloud)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql)
 ![Pandas](https://img.shields.io/badge/Data-Pandas-black)
 ![SQLAlchemy](https://img.shields.io/badge/Database-SQLAlchemy-red)
-![Neon PostgreSQL](https://img.shields.io/badge/Storage-Neon%20PostgreSQL-00E599?logo=postgresql&logoColor=white)
-![Pydantic](https://img.shields.io/badge/Validation-Pydantic-009688?logo=pydantic&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/Automation-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
-![BigQuery](https://img.shields.io/badge/Data%20Warehouse-BigQuery-4285F4?logo=googlecloud&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Validation-Pydantic-009688?logo=pydantic)
+![Docker](https://img.shields.io/badge/Container-Docker-2496ED?logo=docker)
+![GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub%20Actions-2088FF?logo=githubactions)
 
 ---
 
-## 📌 Overview
+# 📌 Overview
 
-This project is a **production-style multi-source ETL pipeline** designed to extract, validate, transform, and load data from multiple heterogeneous sources into structured, analytics-ready storage systems.
+This project is a production-style **multi-source ETL/ELT Data Engineering Pipeline** designed to extract data from external APIs and relational databases, validate and standardize datasets, store raw data, and generate analytics-ready data models.
 
-It supports:
+The pipeline supports:
 
-- APIs  
-- Databases Postgres and Big Query 
-- Excel files  
-- Local file ingestion  
+- REST API ingestion
+- PostgreSQL database extraction
+- Incremental data loading
+- Data validation and normalization
+- BigQuery data warehouse loading
+- SQL-based warehouse transformations
+- Automated workflow scheduling using Prefect
 
-All data  from Business multi sources transformed ,modeled and standardized into a unified model/location  for analytics and reporting.
-
----
-
-## 💡 Business Value
-
-Modern organizations struggle with fragmented data across systems.
-
-This pipeline solves that by providing:
-
-- A **single source of truth**
-- Automated and scheduled data ingestion across all sources 
-- Standardized local datalakes validation and transformation layers
-- BI-ready structured datasets in Database and Big Query warehouse 
-- Scalable multi-source integration
+The goal is to create a reliable and scalable data platform for analytics and reporting.
 
 ---
 
-## ⚙️ Key Features
+# 💡 Business Problem
 
-### 🔄 Multi-Source Ingestion
+Modern organizations store data across multiple systems:
+
+- SaaS platforms
+- Transaction databases
+- External APIs
+
+This creates challenges:
+
+- Data fragmentation
+- Duplicate records
+- Manual reporting processes
+- Inconsistent business metrics
+
+This pipeline solves these challenges by creating a centralized data workflow or Data pipeline to bring in data from different sources :
+
+```
+Multiple Sources
+        |
+        v
+Validated Pipeline
+        |
+        v
+Analytics Warehouse
+```
+
+---
+
+# 🏗️ Architecture
+
+```
+                 Data Sources
+
+          REST APIs       PostgreSQL
+              |              |
+              +--------------+
+
+                    |
+                    v
+
+              Extract Layer
+
+        API Connectors
+        Database Connectors
+
+
+                    |
+                    v
+
+            Validation Layer
+
+        Pydantic Models
+        Data Quality Checks
+
+
+                    |
+                    v
+
+              Raw Storage
+
+        Raw API Data
+        Raw Database Data
+
+
+                    |
+                    v
+
+              Load Layer
+
+        PostgreSQL
+        BigQuery Warehouse
+
+
+                    |
+                    v
+
+          Transformation Layer
+
+        Python Transformations
+        BigQuery SQL Models
+
+
+                    |
+                    v
+
+          Analytics Ready Data
+```
+
+---
+
+# ⚙️ Key Features
+
+## 🔄 Multi-Source Data Extraction
+
+Supports:
+
 - REST API extraction
-- Database replication (Postgres / external sources)
-- Excel file ingestion (local uploads supported)
+- PostgreSQL extraction
+- Incremental extraction
+- Cursor-based API pagination
+- Database-based incremental loading
 
-### 🧹 Data Processing Layer
-- Schema validation using Pydantic
+
+---
+
+## 🧹 Data Validation
+
+Using Pydantic:
+
+- Schema validation
+- Data type checking
+- Required field validation
 - Data normalization
-- Deduplication and cleaning
+- Data quality rules
 
-### 🔄 Transformation Layer
-- Business logic transformations
-- Structured data modeling
-- Analytics-ready dataset generation
-
-### 🗄️ Data Storage Layer
-- S3/R2 Cloud  data lake storage
-- Staging database tables
-- Final analytics-ready tables (Postgres / BigQuery)
-
-### ⏱️ Automation & Scheduling
-- Cron-based scheduling via Prefect
-- File-based triggers for local ingestion
-- CI/CD automation via GitHub Actions
 
 ---
 
-## 🏗️ Architecture
+## 🔄 Transformation Layer
 
-Extract Layer
- ├── API
- ├── Database
- └── Excel Files
+Supports two transformation approaches:
 
-        ↓
+### Python Transformations
 
-Validation Layer
- ├── Schema validation (Pydantic)
- ├── Data quality checks
+Used for:
 
-        ↓
+- API normalization
+- Complex business logic
+- Data preparation
 
-Transformation Layer
- ├── Business logic
- ├── Data modeling
 
-        ↓
+### BigQuery SQL Transformations
 
-Load Layer
- ├── Data Lake (raw storage)
- ├── PostgreSQL (staging)
- └── BigQuery (analytics)
+Used for:
+
+- Warehouse modelling
+- Analytics tables
+- Business reporting datasets
+
 
 ---
 
-## 📂 Project Structure
+# 🗄️ Storage Architecture
 
-app/          → Orchestration & entry point  
-extract/      → Data source connectors (API, DB, files)  
-validate/     → Schema validation & quality rules  
-transform/    → Business logic & transformations  
-load_data/    → Database & warehouse loaders  
-save_raw/     →  S3/R2 Datalake
-local/        → Local file ingestion (Excel uploads)  
-datalake/     → R2 processed data storage  
+## Bronze Layer (Raw)
+
+Stores original extracted data:
+
+```
+Raw API Data
+
+Raw Database Data
+```
+
+Purpose:
+
+- Data recovery
+- Pipeline replay
+- Historical preservation
+
+
+## Analytics Layer
+
+Produces:
+
+```
+Clean Business Tables
+
+Analytics Models
+
+Reporting Datasets
+```
 
 ---
 
-## 🔐 Security
+# ⏱️ Automation & Scheduling
 
-- Secrets managed via environment variables & Prefect Secret Blocks  
-- No hardcoded credentials  
-- API keys, DB URLs, and GCP credentials stored securely  
+Pipeline orchestration is handled using Prefect.
+
+Workflow:
+
+```
+Prefect Scheduler
+
+        |
+        v
+
+Extract API Data
+
+        |
+        v
+
+Extract Database Data
+
+        |
+        v
+
+Validate Data
+
+        |
+        v
+
+Save Raw Data
+
+        |
+        v
+
+Load BigQuery
+
+        |
+        v
+
+Run SQL Transformations
+
+        |
+        v
+
+Analytics Tables
+```
 
 ---
 
-## 📊 Outputs
+# 📂 Project Structure
+
+```
+app/
+ └── main.py
+        → Pipeline entry point
+
+
+extract/
+        → API and database connectors
+
+
+validate/
+        → Schema validation and data quality checks
+
+
+transform/
+        → Python transformation logic
+
+
+load_data/
+        → Database and BigQuery loaders
+
+
+save_raw/
+        → Raw data storage layer
+
+
+sql/
+        → BigQuery SQL transformation models
+
+
+tests/
+        → Pipeline tests
+
+
+prefect.yaml
+        → Workflow scheduling configuration
+```
+
+---
+
+# 🔐 Security
+
+Security practices:
+
+- Secrets stored using environment variables
+- Cloud credentials managed securely
+- No hardcoded API keys
+- Protected database connections
+
+
+---
+
+# 🧰 Technology Stack
+
+## Programming
+
+- Python
+
+
+## Data Processing
+
+- Pandas
+- PyArrow
+
+
+## Databases
+
+- PostgreSQL
+- Google BigQuery
+
+
+## Data Engineering
+
+- Prefect
+- SQLAlchemy
+- Pydantic
+- HTTPX
+
+
+## DevOps
+
+- Docker
+- GitHub Actions
+
+
+---
+
+# 📊 Pipeline Outputs
 
 The pipeline produces:
 
-- Clean structured datasets  
-- Analytics-ready tables  
-- Standardized business models  
-- BI-compatible outputs for dashboards and reporting  
+- Clean structured datasets
+- Analytics-ready warehouse tables
+- Standardized business models
+- BI-compatible reporting datasets
+
 
 ---
 
-## 🧰 Tech Stack
+# 🎯 Use Cases
 
-- Python  
-- Prefect (workflow orchestration)  
-- PostgreSQL (Neon)  
-- Google BigQuery  
-- Pandas  
-- boto3
-- SQLAlchemy  
-- Pydantic  
-- HTTPX  
-- OpenPyXL  
-- PyArrow  
-- GitHub Actions (CI/CD)
+This architecture can support:
+
+- Business intelligence pipelines
+- SaaS analytics platforms
+- Financial data processing
+- E-commerce analytics
+- Operational reporting systems
+
 
 ---
 
-## 🎯 Use Cases
+# 🚀 Execution Modes
 
-- Business intelligence pipelines  
-- SaaS reporting systems  
-- Financial data aggregation  
-- E-commerce analytics  
-- Operational dashboards  
+## Scheduled Execution
 
----
+Automated runs using Prefect schedules.
 
-## 🚀 Execution Modes
+Example:
 
-### Scheduled Runs
-Automated execution using Prefect cron schedules.
-
-### Event-Driven Runs
-Triggered by new file uploads in local ingestion directory.
+```
+Daily pipeline execution
+```
 
 ---
 
-## 🔮 Future Improvements
+## Incremental Execution
 
-- Real-time streaming ingestion (Kafka / PubSub)  
-- Data observability & monitoring layer  
-- Airbyte connector integration  
-- Dashboard layer (Streamlit / Metabase)  
-- Advanced testing framework (pytest + data validation tests)  
-- Cloud-native deployment (Docker + Kubernetes)
+Only new or updated records are processed.
+
+Examples:
+
+```
+API cursor tracking
+
+Database updated_at extraction
+```
 
 ---
 
-## 🚀 Getting Started
+# 🔮 Future Improvements
+
+Planned improvements:
+
+- Data observability layer
+- Pipeline monitoring
+- Automated data quality reporting
+- dbt transformation models
+- Streaming ingestion using Kafka/PubSub
+- Cloud-native deployment with Kubernetes
 
 
-python -m venv venv
-source venv/bin/activate   # Mac/Linux
-venv\Scripts\activate    
+---
 
-# make sure to get all creditentials 
+# 🚀 Getting Started
 
-### 1. Clone repository
+## Clone Repository
+
 ```bash
 git clone https://github.com/nathan6012/Multi_Source_ETLT-.git
+```
 
-explore the code and project Structure { focus on app/main}
+## Create Virtual Environment
 
+```bash
+python -m venv venv
+```
+
+Activate:
+
+Linux/Mac:
+
+```bash
+source venv/bin/activate
+```
+
+Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+## Install Dependencies
+
+```bash
 pip install -r requirements.txt
+```
 
-python -m app.main or navigate around the project folder in your System 
+## Configure Credentials
 
+Set:
 
+- Database credentials
+- API keys
+- Google Cloud credentials
 
-Shamola Nassan
+Use environment variables.
+
+---
+
+## Run Pipeline
+
+```bash
+python -m app.main
+```
+
+or navigate through the project modules.
+
+---
+
+# 👤 Author
+
+**Shamola Nassan**
+
 Data Engineering | ETL Systems | Automation Pipelines

@@ -14,39 +14,33 @@ import requests
 # Connectors
 from extract.api_connect import run_pipeline
 from extract.database_connect import extract_from_db
-from extract.file_connect import extract_xl_file
 
 # Save
 from save_raw.save_database_file import save_raw_db_data
-from save_raw.save_file_file import save_raw_execel_data
+
 from save_raw.save_raw_api import save_raw_api_data
 
 # Models
-from validate.models import SalesData, ProductsData, PaymentData
+from validate.models import  ProductsData, PaymentData
 
 # Validation
 from validate.api_normalize import normalize_data
 from validate.validate_api import validate_api
-from validate.validate_database import validate_database_data
-from validate.validate_file import validate_file_data
+
 
 # Transform
 from transform.transform_api_data import transform_api_data
-from transform.transform_db import transform_database_data
-from transform.transform_file import transform_excel_data
+from transform.transform_db import run_etl_pipeline
 
 # Load
 from load_data.load_api import load_api_data_database
 from load_data.load_database import big_Query_client
-from load_data.load_file import load_file_data_database
 
-from app.file_sys import files_management
+
+from utils.file_sys import files_management
+
 
 logging.basicConfig(level=logging.INFO)
-
-
-
-
 
 async def send_slack(message: str):
   webhook = await Secret.load("slack-webhook")
@@ -55,6 +49,13 @@ async def send_slack(message: str):
   if webhook:
     requests.post(webhook, json={"text": message})
         
+
+@task 
+def files_management_task(endpoint, access_key, secret_key):
+  return files_management
+
+
+
 
 
 # ------------------- API TASKS -------------------
@@ -95,49 +96,23 @@ def save_raw_db_data_task(y, endpoint, access_key, secret_key):
   return save_raw_db_data(y, endpoint, access_key, secret_key)
 
 @task
-def validate_database_data_task(y, model):
-  return validate_database_data(y, model)
-
-@task
-def transform_database_data_task(f, g):
-  return transform_database_data(f, g)
+def transform_database_data_task():
+  return run_etl_pipeline()
 
 @task
 def load_db_data_big_query_task(data, gcp_creds):
   return big_Query_client(data, gcp_creds)
 
 
-# ------------------- FILE TASKS -------------------
-
-@task
-def extract_xl_file_task():
-  return extract_xl_file()
-
-@task
-def save_raw_execel_data_task(d, endpoint, access_key, secret_key):
-  return save_raw_execel_data(d, endpoint, access_key, secret_key)
-
-@task
-def validate_file_data_task(d, model):
-  return validate_file_data(d, model)
-
-@task
-def transform_excel_data_task(t, r):
-  return transform_excel_data(t, r)
-
-@task
-async def load_file_data_database_task(data, db_url):
-  return await load_file_data_database(data, db_url)
-
-@task
-def files_management_task(endpoint, access_key, secret_key):
-  return files_management(endpoint, access_key, secret_key)
+# -- -------------------
 
 
 # ------------------- FLOWS -------------------
 
 @flow(log_prints=True)
 async def main_flow_api(api_key, db_url, endpoint, access_key, secret_key):
+  """ API data Extract ETL Flow """
+  
   raw_api = await api_extract_task(api_key)
   print(len(raw_api))
   
@@ -158,40 +133,32 @@ async def main_flow_api(api_key, db_url, endpoint, access_key, secret_key):
   else:
     print("No API Data")
 
+#______
+#________
+
+
+
 
 @flow(log_prints=True)
 async def main_flow_db(db_url, gcp_creds, endpoint, access_key, secret_key):
+  """  postgres To Big Query Migration """ 
   
   print("Data To Big query Migration Etl logic")
   db_data = await extract_from_db_task(db_url)
   print(len(db_data))
 
   save_raw_db_data_task(db_data, endpoint, access_key, secret_key)
+  
+# change validation logic  
+  records  = validate_database_data_task(db_data, ProductsData)
 
-  clean, unclean = validate_database_data_task(db_data, ProductsData)
+  data =  load_db_data_big_query_task(records, gcp_creds)
+  
+  transform_database_data_task()
+  
+  
+  
 
-  records = transform_database_data_task(clean, unclean)
-  print(len(records))
-
-  load_db_data_big_query_task(records, gcp_creds)
-
-
-@flow
-async def main_flow_excel(db_url, endpoint, access_key, secret_key):
-  print("Excel Etl Logic Runngin")
-  xl_data = extract_xl_file_task()
-
-  if xl_data:
-    save_raw_execel_data_task(xl_data, endpoint, access_key, secret_key)
-
-    clean, unclean = validate_file_data_task(xl_data, SalesData)
-
-    records = transform_excel_data_task(clean, unclean)
-    print(len(records))
-
-    await load_file_data_database_task(records, db_url)
-  else:
-    print("No Excel Data")
 
 
 # ------------------- ORCHESTRATOR -------------------
@@ -216,10 +183,10 @@ async def etl_orchestrator():
     await main_flow_api(api_key, db_url, endpoint, access_key, secret_key)
 
     await main_flow_db(db_url, gcp_creds, endpoint, access_key, secret_key)
-
-    await main_flow_excel(db_url, endpoint, access_key, secret_key)
-
+    
     files_management_task(endpoint, access_key, secret_key)
+    
+    
 
     await send_slack(
             "✅ ETL SUCCESS: etl_orchestrator\n"

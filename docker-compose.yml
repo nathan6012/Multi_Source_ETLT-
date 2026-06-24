@@ -1,0 +1,44 @@
+version: "3.9"
+
+
+services:
+
+  etl_app:
+
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+
+    container_name: etl_pipeline
+
+    volumes:
+      - ./credentials:/app/credentials
+
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/credentials/calm-sky-419511-38ce7f0f9910.json
+
+    restart: always
+
+
+
+  dashboard:
+
+    build:
+      context: .
+      dockerfile: dashboards/Dockerfile
+
+    container_name: streamlit_dashboard
+
+    ports:
+      - "8501:8501"
+
+    volumes:
+      - ./credentials:/dashboard/credentials
+
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /dashboard/credentials/calm-sky-419511-38ce7f0f9910.json
+
+    depends_on:
+      - etl_app
+
+    restart: always

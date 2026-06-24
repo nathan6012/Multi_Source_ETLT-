@@ -1,36 +1,39 @@
-
--- Postgres Extract to Big Query Schemas 
-
-CREATE dim_product_details(
-  details_id SERIAL PRIMARY KEY ,
-  product_name TEXT NOT NULL ,
-  category TEXT NOT NULL,
-  region TEXT NOT NULL,
-categorycrested_on TIMESTAMPS NOW()
+CREATE TABLE dim_product_details (
+    details_id SERIAL PRIMARY KEY,
+    product_name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    region TEXT NOT NULL,
+    created_on TIMESTAMP DEFAULT NOW()
 );
 
 
-CREATE dim_dates(
-  date_id DATE PRIMARY KEY ,
-  year INT,
-  month INT,
-  day INT
+CREATE TABLE dim_dates (
+    date_id DATE PRIMARY KEY,
+    year INT NOT NULL,
+    month INT NOT NULL,
+    day INT NOT NULL
 );
 
 
-CREATE facts_production(
-  product_id SERIAL PRIMARY KEY,
-  
-  details_id  INT NOT NULL REFERENCES
-  dim_product_details(details_id),
+CREATE TABLE fact_production (
+    production_id SERIAL PRIMARY KEY,
 
-  date_id DATE NOT NULL  REFERENCES
-  dim_dates(date_id),
+    details_id INT NOT NULL,
+    date_id DATE NOT NULL,
 
-  units_produced INT NOT NULL,
-  defective_units INT NOT NULL,
-  revenue INT NOT NULL ,
-  cost INT NOT NULL,
-  analyst_score INT NOT NULL,
-  created_on TIMESTAMPS NOW()
+    units_produced INT NOT NULL,
+    defective_units INT NOT NULL,
+
+    revenue NUMERIC(12,2) NOT NULL,
+    cost NUMERIC(12,2) NOT NULL,
+
+    analyst_score INT,
+
+    created_on TIMESTAMP DEFAULT NOW(),
+
+    FOREIGN KEY(details_id)
+        REFERENCES dim_product_details(details_id),
+
+    FOREIGN KEY(date_id)
+        REFERENCES dim_dates(date_id)
 );

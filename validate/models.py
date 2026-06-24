@@ -10,23 +10,6 @@ from typing import Optional
 from datetime import datetime 
 
 
-
-
-
-class SalesData(BaseModel):
-  
-  model_config = ConfigDict(extra="forbid")
- # File model 
-  order_id: int 
-  customer: str
-  region: Optional[str] = None 
-  product: str 
-  quantity: int                     
-  unit_price: Decimal
-  cost_per_unit: Decimal
-  order_date: datetime
-  
-  sheet_name: Optional[str] = None 
   
 class ProductsData(BaseModel):
   
